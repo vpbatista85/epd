@@ -63,7 +63,8 @@ def f_carrinho(l_prod):
 def main():
     #lista de produtos no carrinho
     #df = pd.read_csv(r"C:\Users\vitor\Documents\Python\streamlit\Scripts\output.csv", encoding = 'utf-8')
-    df = pd.read_csv(r"https://raw.githubusercontent.com/vpbatista85/epd/blob/main/output.csv", encoding = 'utf-8')
+    df_server= pd.read_csv(r"https://github.com/vpbatista85/epd/blob/main/output.csv?raw=true", encoding = 'utf-8')
+    df=df_server.copy()
     df.fillna("",inplace=True)
     f_escolha(df,l_prod)
     f_carrinho(l_prod)
