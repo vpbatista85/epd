@@ -98,7 +98,7 @@ def rnp_apr(dfs:pd.DataFrame,l_prod):
     dft=pd.DataFrame(data=te_array,columns=encoder.columns_)
     frequent_items=apriori(dft,min_support=0.01,use_colnames=True)
     frequent_items['length'] = frequent_items['itemsets'].apply(lambda x: len(x))
-    rules=association_rules(frequent_items, metric='confidence',min_threshold=0.3)
+    rules=association_rules(frequent_items, metric='lift',min_threshold=1.0)
     rules.sort_values(by='lift',ascending=False)
     rules.antecedents=rules.antecedents.astype('string')
     rules.consequents=rules.consequents.astype('string')
