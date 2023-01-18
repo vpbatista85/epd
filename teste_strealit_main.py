@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 #import matplotlib.pyplot as plt
 #import seaborn as sns
+from sklearn.preprocessing import OneHotEncoder
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
 
 def f_escolha(df):
 
@@ -71,11 +74,45 @@ def f_carrinho():
                 st.write(i)
 
 
-def rnp_apr():
+def rnp_apr(dfs:pd.DataFrame,l_prod):
     #Recomendação não personalizada utilizando o algoritimo apriori.
-    return
+    ##agrupando os pedidos
+    df_l=dfs[['cod_pedido','produto_f']].groupby('cod_pedido').agg({'produto_f': lambda x : ','.join(set(x))})
+    df_l.rename(columns={'produto_f':'itens'},inplace=True)
+    df_l.reset_index(inplace=True)
+    df_l['itens']=df_l.itens.str.split(pat=',')
+    df_l.head()
 
-def rec_top_n(ratings:pd.DataFrame, n:int) -> pd.DataFrame:
+   # n_d={}
+    #for p in dfs.cod_pedido.values:
+     #   a=[]
+      #  t=dfs[dfs['cod_pedido']==p]
+       # for i in t.produto_f.values:
+        #    a.append(i)
+    #n_d[p]=a
+
+    encoder=TransactionEncoder()
+    
+    #te_array=encoder.fit(n_d.values()).transform(n_d.values())
+    te_array=encoder.fit(list(df_l.itens)).transform(list(df_l.itens))
+    dft=pd.DataFrame(data=te_array,columns=encoder.columns_)
+    frequent_items=apriori(dft,min_support=0.01,use_colnames=True)
+    frequent_items['length'] = frequent_items['itemsets'].apply(lambda x: len(x))
+    rules=association_rules(frequent_items, metric='confidence',min_threshold=0.3)
+    rules.sort_values(by='lift',ascending=False)
+    rules.antecedents=rules.antecedents.astype('string')
+    rules.consequents=rules.consequents.astype('string')
+    rules.antecedents=rules.antecedents.str.strip('frozenset({})')
+    rules.consequents=rules.consequents.str.strip('frozenset({})')
+    #recomendação
+    recomendations=pd.DataFrame(columns=rules.columns)
+    for i in l_prod:
+        recomendations=pd.concat([recomendations,rules[rules.antecedents.str.contains(i, regex=False)]],ignore_index=True)
+
+
+    return recomendations
+
+def rnp_top_n(ratings:pd.DataFrame, n:int) -> pd.DataFrame:
     #Recomendação não personalizada por n produtos mais consumidos.
     recommendations = (
         ratings
@@ -93,16 +130,16 @@ def r_np(df_loja_recnp,l_prod):
         placeholder1 = st.empty() 
     else:
         tab1, tab2, = st.tabs(["Apriori", "Top N"])
-        with tab1:
-            rec_np=rec_top_n(df_loja_recnp,n=5)
+        with tab1:          
+            rec_np=rnp_apr(df_loja_recnp,l_prod)
             placeholder1 = st.empty()
-            placeholder1.text("Adicione ao carrinho os produtos mais vendidos:")
+            placeholder1.text("Quem comprou estes produtos também comprou:")
             with placeholder1.container():
-                    st.write("Adicione ao carrinho os produtos mais vendidos:")
-                    for i in rec_np.produto_f:
+                    st.write("Quem comprou estes produtos também comprou:")
+                    for i in rec_np.consequents:
                         st.write(i)
         with tab2:
-            rec_np=rec_top_n(df_loja_recnp,n=5)
+            rec_np=rnp_top_n(df_loja_recnp,n=5)
             placeholder1 = st.empty()
             placeholder1.text("Adicione ao carrinho os produtos mais vendidos:")
             with placeholder1.container():
@@ -115,6 +152,7 @@ def main():
     #df = pd.read_csv(r"C:\Users\vitor\Documents\Python\streamlit\Scripts\output.csv", encoding = 'utf-8')
     df_server= pd.read_csv(r"https://github.com/vpbatista85/epd/blob/main/output.csv?raw=true", encoding = 'utf-8')
     df=df_server.copy()
+    df.drop_duplicates(inplace=True)
     df.fillna("",inplace=True)
     df_loja_recnp=f_escolha(df)
     f_carrinho()
