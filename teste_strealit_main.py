@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 #import matplotlib.pyplot as plt
 #import seaborn as sns
-from sklearn.preprocessing import OneHotEncoder
+#from sklearn.preprocessing import OneHotEncoder
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
 
@@ -54,7 +54,7 @@ def f_escolha(df):
 
     df_compl=df_prod[df_prod['prodcomplemento']==complement]
 
-    prodf=product+str(complement)
+    prodf=product+" "+str(complement)
 
 
     if st.button('Add carrinho'):
@@ -82,18 +82,8 @@ def rnp_apr(dfs:pd.DataFrame,l_prod):
     df_l.reset_index(inplace=True)
     df_l['itens']=df_l.itens.str.split(pat=',')
     df_l.head()
-
-   # n_d={}
-    #for p in dfs.cod_pedido.values:
-     #   a=[]
-      #  t=dfs[dfs['cod_pedido']==p]
-       # for i in t.produto_f.values:
-        #    a.append(i)
-    #n_d[p]=a
-
+    ##aplicando as funções do mlxtend:
     encoder=TransactionEncoder()
-    
-    #te_array=encoder.fit(n_d.values()).transform(n_d.values())
     te_array=encoder.fit(list(df_l.itens)).transform(list(df_l.itens))
     dft=pd.DataFrame(data=te_array,columns=encoder.columns_)
     frequent_items=apriori(dft,min_support=0.01,use_colnames=True)
@@ -105,14 +95,16 @@ def rnp_apr(dfs:pd.DataFrame,l_prod):
     rules.antecedents=rules.antecedents.str.strip('frozenset({})')
     rules.consequents=rules.consequents.str.strip('frozenset({})')
     #recomendação
-    recomendations=pd.DataFrame(columns=rules.columns)
+    recommendations=pd.DataFrame(columns=rules.columns)
     for i in l_prod:
-        recomendations=pd.concat([recomendations,rules[rules.antecedents.str.contains(i, regex=False)]],ignore_index=True)
+        recommendations=pd.concat([recommendations,rules[rules.antecedents.str.contains(i, regex=False)]],ignore_index=True)
+    for i in l_prod:
+        recommendations=recommendations[recommendations.consequents.str.contains(i, regex=False)==False]
+    recommendations.consequents.drop_duplicates(inplace=True)
+   
+    return recommendations
 
-
-    return recomendations
-
-def rnp_top_n(ratings:pd.DataFrame, n:int) -> pd.DataFrame:
+def rnp_top_n(ratings:pd.DataFrame, n:int, l_prod:list) -> pd.DataFrame:
     #Recomendação não personalizada por n produtos mais consumidos.
     recommendations = (
         ratings
@@ -122,7 +114,8 @@ def rnp_top_n(ratings:pd.DataFrame, n:int) -> pd.DataFrame:
         .rename({'cliente_nome': 'score'}, axis=1)
         .sort_values(by='score', ascending=False)
     )
-
+    for i in l_prod:
+      recommendations=recommendations[recommendations.produto_f.str.contains(i, regex=False)==False]
     return recommendations.head(n)           
 
 def r_np(df_loja_recnp,l_prod): 
@@ -134,12 +127,16 @@ def r_np(df_loja_recnp,l_prod):
             rec_np=rnp_apr(df_loja_recnp,l_prod)
             placeholder1 = st.empty()
             placeholder1.text("Quem comprou estes produtos também comprou:")
-            with placeholder1.container():
-                    st.write("Quem comprou estes produtos também comprou:")
-                    for i in rec_np.consequents:
-                        st.write(i)
+            if rec_np.shape[0]>0:
+                with placeholder1.container():
+                        st.write("Quem comprou estes produtos também comprou:")
+                        for i in rec_np.consequents:
+                            st.write(i)
+            else:
+                with placeholder1.container():
+                        st.write("Sem proposições para este item")
         with tab2:
-            rec_np=rnp_top_n(df_loja_recnp,n=5)
+            rec_np=rnp_top_n(df_loja_recnp,n=5,l_prod=l_prod)
             placeholder1 = st.empty()
             placeholder1.text("Adicione ao carrinho os produtos mais vendidos:")
             with placeholder1.container():
