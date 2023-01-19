@@ -1,13 +1,11 @@
-pip install mlxtend
-pip install -U scikit-learn
-
-
 import streamlit as st
 import pandas as pd
 import numpy as np
+import sklearn
+import mlxtend
 #import matplotlib.pyplot as plt
 #import seaborn as sns
-#from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
 
