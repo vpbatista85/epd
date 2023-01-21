@@ -95,7 +95,7 @@ def f_carrinho():
                     placeholder.text("Carrinho:")
                     with placeholder.container():
                         st.write('Carrinho:')
-                        for i in st.session_state.l_prod:
+                        for i in st.session_state.l_prod[0:-2]:
                             st.write(i)
 
         if st.button('Del carrinho',disabled=state):
