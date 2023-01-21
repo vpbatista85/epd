@@ -89,7 +89,9 @@ def f_carrinho():
 
         if st.button('Del carrinho',disabled=state):
                 st.session_state.l_prod=[]
-                st.write (f"Carrinho limpo.")           
+                st.write (f"Carrinho limpo.") 
+                with placeholder.container():
+                    st.write('Carrinho:')         
 
 
 def rnp_apr(dfs:pd.DataFrame,l_prod):
