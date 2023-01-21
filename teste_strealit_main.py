@@ -65,7 +65,7 @@ def f_escolha(df):
 
 
     if st.button('Add carrinho'):
-            st.write(prodf,"adicionado ao carrinho")
+            st.write(prodf,"adicionado ao carrinho.")
             st.session_state.l_prod.append(prodf)
 
     return df_loja_recnp
@@ -79,6 +79,12 @@ def f_carrinho():
             st.write('Carrinho:')
             for i in st.session_state.l_prod:
                 st.write(i)
+
+        if st.button('Del carrinho'):
+            if len(st.session_state.l_prod)>=1:
+                st.write (f"{st.session_state.l_prod:[-1]}, removido do carrinho.")
+                st.session_state.l_prod.pop()
+            st.button('Del carrinho',disabled=True)
 
 
 def rnp_apr(dfs:pd.DataFrame,l_prod):
