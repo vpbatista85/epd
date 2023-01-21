@@ -74,17 +74,21 @@ def f_carrinho():
         import streamlit as st
         placeholder = st.empty()
         placeholder.text("Carrinho:")
-
+        if len(st.session_state.l_prod)==0:
+            state=True
+        else:
+            state=False
         with placeholder.container():
             st.write('Carrinho:')
             for i in st.session_state.l_prod:
                 st.write(i)
 
-        if st.button('Del carrinho'):
-            if len(st.session_state.l_prod)>=1:
-                st.write (f"{st.session_state.l_prod:[-1]}, removido do carrinho.")
+        if st.button('Del item',disabled=state):
+                st.write (f"{st.session_state.l_prod[-1]}, removido do carrinho.")
                 st.session_state.l_prod.pop()
-            st.button('Del carrinho',disabled=True)
+        if st.button('Del carrinho',disabled=state):
+                st.write (f"Carrinho limpo.")
+                st.session_state.l_prod=[]           
 
 
 def rnp_apr(dfs:pd.DataFrame,l_prod):
