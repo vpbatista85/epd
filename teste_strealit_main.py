@@ -25,11 +25,7 @@ from streamlit.source_util import (
     _on_pages_changed
 )
 
-st.set_page_config(
-    page_title= "login",
-    layout="centered",
-    initial_sidebar_state="auto"
-    )
+
 
 
 def delete_page(main_script_path_str, page_name):
@@ -64,6 +60,12 @@ def add_page(main_script_path_str, page_name):
 
 def f_escolha(df):
 
+    st.set_page_config(
+    page_title= "login",
+    layout="centered",
+    initial_sidebar_state="auto"
+    )
+
     st.title("Bem vindo!")
 
     st.write("Este é um ambiente de testes para sistemas de recomendação")
@@ -75,7 +77,7 @@ def f_escolha(df):
     ##Seleção do usuário:
     user= st.selectbox(
         'Selecione o usuário:',
-        df['cliente_nome'].unique())
+        df_loja['cliente_nome'].unique())
 
     ##Seleção dos campos referente ao produto:
     st.write('Selecione o produto para o carrinho:')
