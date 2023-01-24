@@ -1,5 +1,10 @@
 import streamlit as st
+import pandas as pd
+import teste_strealit_main
 
+store=st.session_state.store
+user=st.session_state.user
+df=st.session_state.df
     ##Seleção dos campos referente ao produto:
 st.write('Selecione o produto para o carrinho:')
 df_loja=df[df['loja_compra']==store]
