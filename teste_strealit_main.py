@@ -17,14 +17,64 @@ from mlxtend.frequent_patterns import apriori, association_rules
 from sklearn.pipeline import Pipeline
 from sklearn.metrics.pairwise import cosine_similarity
 
+from pathlib import Path
+from streamlit.source_util import (
+    page_icon_and_name, 
+    calc_md5, 
+    get_pages,
+    _on_pages_changed
+)
+
+st.set_page_config(
+    layout="centered",
+    initial_sidebar_state="auto"
+)
+
+def delete_page(main_script_path_str, page_name):
+
+    current_pages = get_pages(main_script_path_str)
+
+    for key, value in current_pages.items():
+        if value['page_name'] == page_name:
+            del current_pages[key]
+            break
+        else:
+            pass
+    _on_pages_changed.send()
+
+def add_page(main_script_path_str, page_name):
+    
+    pages = get_pages(main_script_path_str)
+    main_script_path = Path(main_script_path_str)
+    pages_dir = main_script_path.parent / "pages"
+    script_path = [f for f in pages_dir.glob("*.py") if f.name.find(page_name) != -1][0]
+    script_path_str = str(script_path.resolve())
+    pi, pn = page_icon_and_name(script_path)
+    psh = calc_md5(script_path_str)
+    pages[psh] = {
+        "page_script_hash": psh,
+        "page_name": pn,
+        "icon": pi,
+        "script_path": script_path_str,
+    }
+    _on_pages_changed.send()
+
+
 def f_escolha(df):
 
     st.title("Bem vindo!")
-        #Seleção da loja 
 
+    st.write("Este é um ambiente de testes para sistemas de recomendação")
+        #Seleção da loja 
+    
     store = st.selectbox(
         'Selecione a Loja:',
         df['loja_compra'].unique())
+    ##Seleção do usuário:
+    user= st.selectbox(
+        'Selecione o usuário:',
+        df['cliente_nome'].unique())
+
     ##Seleção dos campos referente ao produto:
     st.write('Selecione o produto para o carrinho:')
     df_loja=df[df['loja_compra']==store]
