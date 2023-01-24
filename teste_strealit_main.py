@@ -368,11 +368,7 @@ def r_p(df_loja_recnp,l_prod):
 
 
 def main():
-    st.set_page_config(
-    page_title="login",
-    layout="centered",
-    initial_sidebar_state="auto"
-    )
+
     #lista de produtos no carrinho
     #df = pd.read_csv(r"C:\Users\vitor\Documents\Python\streamlit\Scripts\output.csv", encoding = 'utf-8')
     df_server= pd.read_csv(r"https://github.com/vpbatista85/epd/blob/main/output.csv?raw=true", encoding = 'utf-8')
@@ -389,6 +385,11 @@ def main():
 
 #inicio main:
 
+st.set_page_config(
+    page_title= "login",
+    layout="centered",
+    initial_sidebar_state="auto"
+    )
 
 if 'l_prod' not in st.session_state:
     st.session_state.l_prod = []
