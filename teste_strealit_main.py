@@ -6,8 +6,11 @@ import mlxtend
 import os
 from collections import Counter
 import networkx as nx
-#import matplotlib.pyplot as plt
-#import seaborn as sns
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+from funk_svd import SVD
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
