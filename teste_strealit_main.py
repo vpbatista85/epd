@@ -1,11 +1,4 @@
 import streamlit as st
-
-st.set_page_config(
-    page_title= 'login',
-    layout="centered",
-    initial_sidebar_state="auto"
-    )
-
 import pandas as pd
 import numpy as np
 import sklearn
@@ -64,7 +57,7 @@ def add_page(main_script_path_str, page_name):
     }
     _on_pages_changed.send()
 
-
+st.cache(suppress_st_warning=True)
 def f_escolha(df):
 
 
@@ -394,6 +387,11 @@ def main():
 
 
 #inicio main:
+st.set_page_config(
+    page_title = 'login',
+    layout ="centered",
+    initial_sidebar_state ="auto"
+    )
 
 if 'l_prod' not in st.session_state:
     st.session_state.l_prod = []
