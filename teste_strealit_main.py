@@ -90,10 +90,10 @@ def f_escolha(df):
                 for i in st.session_state.l_prod[0:-2]:
                     st.write(i)
 
-        if st.button('Del carrinho',disabled=state):
-                st.session_state.l_prod=[]
-                st.write (f"Carrinho limpo.") 
-                placeholder.empty()
+    if st.button('Del carrinho',disabled=state):
+        st.session_state.l_prod=[]
+        st.write (f"Carrinho limpo.") 
+        placeholder.empty()
 
 
     return df_loja_recnp
