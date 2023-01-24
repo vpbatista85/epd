@@ -26,6 +26,7 @@ from streamlit.source_util import (
 )
 
 st.set_page_config(
+    page_title="login",
     layout="centered",
     initial_sidebar_state="auto"
 )
