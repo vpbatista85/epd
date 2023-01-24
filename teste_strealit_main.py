@@ -75,6 +75,13 @@ def f_escolha(df):
         'Selecione o usuário:',
         df[df['loja_compra']==store]['cliente_nome'].unique())
 
+    if 'df' not in st.session_state:
+        st.session_state.df=df
+    if 'store' not in st.session_state:
+        st.session_state.store=store
+    if 'user' not in st.session_state:
+        st.session_state.user=user
+
     ##Seleção dos campos referente ao produto:
     st.write('Selecione o produto para o carrinho:')
     df_loja=df[df['loja_compra']==store]
