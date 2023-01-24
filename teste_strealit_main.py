@@ -25,11 +25,7 @@ from streamlit.source_util import (
     _on_pages_changed
 )
 
-st.set_page_config(
-    page_title="login",
-    layout="centered",
-    initial_sidebar_state="auto"
-)
+
 
 def delete_page(main_script_path_str, page_name):
 
@@ -387,7 +383,11 @@ def main():
 
 
 #inicio main:
-
+st.set_page_config(
+    page_title="login",
+    layout="centered",
+    initial_sidebar_state="auto"
+)
 if 'l_prod' not in st.session_state:
     st.session_state.l_prod = []
 if __name__ == "__main__":
