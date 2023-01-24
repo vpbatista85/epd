@@ -61,7 +61,7 @@ def add_page(main_script_path_str, page_name):
 def f_escolha(df):
 
     st.set_page_config(
-    page_title= "login",
+    page_title= 'login',
     layout="centered",
     initial_sidebar_state="auto"
     )
@@ -77,7 +77,7 @@ def f_escolha(df):
     ##Seleção do usuário:
     user= st.selectbox(
         'Selecione o usuário:',
-        df_loja['cliente_nome'].unique())
+        df[df['loja_compra']==store]['cliente_nome'].unique())
 
     ##Seleção dos campos referente ao produto:
     st.write('Selecione o produto para o carrinho:')
