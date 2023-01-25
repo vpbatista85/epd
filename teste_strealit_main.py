@@ -82,6 +82,11 @@ def f_escolha(df):
     if 'user' not in st.session_state:
         st.session_state.user=user
 
+    if st.button('Login'):
+        st.session_state.df=df
+        st.session_state.store=store
+        st.session_state.user=user
+
     ##Seleção dos campos referente ao produto:
     st.write('Selecione o produto para o carrinho:')
     df_loja=df[df['loja_compra']==store]
