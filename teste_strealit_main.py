@@ -60,8 +60,8 @@ def add_page(main_script_path_str, page_name):
 st.cache(suppress_st_warning=True)
 def f_escolha(df):
 
-    delete_page('C:\Users\vitor\Documents\Python\streamlit\Scripts\teste_strealit_main.py', 'shop')
-    delete_page('C:\Users\vitor\Documents\Python\streamlit\Scripts\teste_strealit_main.py', 'cart')
+    delete_page("C:\Users\vitor\Documents\Python\streamlit\Scripts\teste_strealit_main.py", "shop")
+    delete_page("C:\Users\vitor\Documents\Python\streamlit\Scripts\teste_strealit_main.py", "cart")
 
     st.title("Bem vindo!")
 
