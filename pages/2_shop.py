@@ -5,6 +5,11 @@ import teste_strealit_main
 store=st.session_state.store
 user=st.session_state.user
 df=st.session_state.df
+st.write(store)
+st.write(user)
+st.write(df)
+
+
     ##Seleção dos campos referente ao produto:
 st.write('Selecione o produto para o carrinho:')
 df_loja=df[df['loja_compra']==store]
