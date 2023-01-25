@@ -88,7 +88,8 @@ def f_escolha(df):
         st.session_state.store=store
         st.session_state.user=user
         add_page('teste_strealit_main.py', 'shop')
-        st.session_state.update({'page': 'shop'})
+        pages = get_pages('teste_strealit_main.py')
+        pages['shop']
 
     ##Seleção dos campos referente ao produto:
     st.write('Selecione o produto para o carrinho:')
