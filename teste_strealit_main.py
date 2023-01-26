@@ -120,9 +120,9 @@ def f_escolha(df):
     #movido para o script da segunda pagina '2_shop.py'
     ##Seleção dos campos referente ao produto:
     #st.write('Selecione o produto para o carrinho:')
-    #df_loja=df[df['loja_compra']==store]
-    #df_loja_recnp=df_loja.copy()
-    #df_loja_recnp['produto_f']=df_loja_recnp['produto']+" "+df_loja_recnp['prodcomplemento']
+    df_loja=df[df['loja_compra']==store]
+    df_loja_recnp=df_loja.copy()
+    df_loja_recnp['produto_f']=df_loja_recnp['produto']+" "+df_loja_recnp['prodcomplemento']
 
     ##Seleção da categoria do produto
     #cat = st.selectbox(
@@ -194,7 +194,7 @@ def f_escolha(df):
     #    placeholder.empty()
 
 
-    #return df_loja_recnp
+    return df_loja_recnp
 
             
 #def f_carrinho():
