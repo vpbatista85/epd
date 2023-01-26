@@ -105,13 +105,13 @@ else:
     p_dis=False
     p_vis="visible"
 
-    complement=st.selectbox(
+complement=st.selectbox(
         'Selecione o complemento:',
         df_prod.prodcomplemento.unique(),
         disabled=p_dis,
         label_visibility=p_vis)
 
-    df_compl=df_prod[df_prod['prodcomplemento']==complement]
+df_compl=df_prod[df_prod['prodcomplemento']==complement]
 
 prodf=product+" "+str(complement)
 
