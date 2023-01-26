@@ -349,7 +349,7 @@ def r_p(df_loja_recnp,l_prod,user_id,n):
                         for i in rec_p.item_id:
                             st.write(i)
         with tab5: 
-            rec_p=rp_iknn(df_loja_recnp,l_prod)
+            rec_p=rp_iknn(df_loja_recnp,l_prod,user_id,n)
             placeholder2 = st.empty()
             placeholder2.text("Quem comprou estes produtos também comprou:")
             with placeholder2.container():
