@@ -114,93 +114,97 @@ def f_escolha(df):
         st.session_state.store=store
         st.session_state.user=user
         add_page('teste_strealit_main.py', 'shop')
-        #time.sleep(1)
         nav_page('shop')
 
-
+    #movido para o script da segunda pagina '2_shop.py'
     ##Seleção dos campos referente ao produto:
-    st.write('Selecione o produto para o carrinho:')
-    df_loja=df[df['loja_compra']==store]
-    df_loja_recnp=df_loja.copy()
-    df_loja_recnp['produto_f']=df_loja_recnp['produto']+" "+df_loja_recnp['prodcomplemento']
+    #st.write('Selecione o produto para o carrinho:')
+    #df_loja=df[df['loja_compra']==store]
+    #df_loja_recnp=df_loja.copy()
+    #df_loja_recnp['produto_f']=df_loja_recnp['produto']+" "+df_loja_recnp['prodcomplemento']
 
-    #Seleção da categoria do produto
-    cat = st.selectbox(
-        'Selecione a categoria:',
-        df_loja.categoria.unique())
-    df_cat=df_loja[df_loja['categoria']==cat]
+    ##Seleção da categoria do produto
+    #cat = st.selectbox(
+    #    'Selecione a categoria:',
+    #    df_loja.categoria.unique())
+    #df_cat=df_loja[df_loja['categoria']==cat]
 
-    #Seleção do tipo do produto
-    tipo = st.selectbox(
-        'Selecione o tipo:',
-        df_cat.tipo_categoria.unique())
-    df_tipo=df_cat[df_cat['tipo_categoria']==tipo]
+    ##Seleção do tipo do produto
+    #tipo = st.selectbox(
+    #    'Selecione o tipo:',
+    #    df_cat.tipo_categoria.unique())
+    #df_tipo=df_cat[df_cat['tipo_categoria']==tipo]
     #Seleção do produto
-    product=st.selectbox(
-        'Selecione o produto:',
-        df_tipo.produto.unique())
-    df_prod=df_tipo[df_tipo['produto']==product]
+    #product=st.selectbox(
+    #    'Selecione o produto:',
+    #    df_tipo.produto.unique())
+    #df_prod=df_tipo[df_tipo['produto']==product]
     #Seleção do complemento
 
-    if df_prod.prodcomplemento.isin([""]).count()>=1 and len(df_prod.prodcomplemento.unique())==1:
-            p_dis=True
-            p_vis="collapsed"
-    else:
-        p_dis=False
-        p_vis="visible"
+    #if df_prod.prodcomplemento.isin([""]).count()>=1 and len(df_prod.prodcomplemento.unique())==1:
+    #        p_dis=True
+    #        p_vis="collapsed"
+    #else:
+    #    p_dis=False
+    #    p_vis="visible"
 
-    complement=st.selectbox(
-        'Selecione o complemento:',
-        df_prod.prodcomplemento.unique(),
-        disabled=p_dis,
-        label_visibility=p_vis)
+    #complement=st.selectbox(
+    #    'Selecione o complemento:',
+    #    df_prod.prodcomplemento.unique(),
+    #    disabled=p_dis,
+    #    label_visibility=p_vis)
 
-    df_compl=df_prod[df_prod['prodcomplemento']==complement]
+    #df_compl=df_prod[df_prod['prodcomplemento']==complement]
 
-    prodf=product+" "+str(complement)
-
-
-    if st.button('Add carrinho'):
-            st.write(prodf,"adicionado ao carrinho.")
-            st.session_state.l_prod.append(prodf)
-
-    if len(st.session_state.l_prod)==0:
-        state=True
-    else:
-        state=False
-    if st.button('Del item',disabled=state):
-        if len(st.session_state.l_prod)==1:
-            st.write (f"{st.session_state.l_prod[-1]}, removido do carrinho.")
-            st.session_state.l_prod=[]
-            placeholder.empty()
-        else:    
-            st.write (f"{st.session_state.l_prod[-1]}, removido do carrinho.")
-            st.session_state.l_prod.pop()
-            placeholder.empty()  
-            placeholder.text("Carrinho:")
-            with placeholder.container():
-                st.write('Carrinho:')
-                for i in st.session_state.l_prod[0:-2]:
-                    st.write(i)
-
-    if st.button('Del carrinho',disabled=state):
-        st.session_state.l_prod=[]
-        st.write (f"Carrinho limpo.") 
-        placeholder.empty()
+    #prodf=product+" "+str(complement)
 
 
-    return df_loja_recnp
+    #if st.button('Add carrinho'):
+    #        st.write(prodf,"adicionado ao carrinho.")
+    #        st.session_state.l_prod.append(prodf)
+    #if st.button('Carrinho'):
+    #    add_page('teste_strealit_main.py', 'cart')
+    #    nav_page('cart')
+
+    ###########################################################
+    #movido para o script da segunda pagina '3_cart.py'
+    #if len(st.session_state.l_prod)==0:
+    #    state=True
+    #else:
+    #    state=False
+    #if st.button('Del item',disabled=state):
+    #    if len(st.session_state.l_prod)==1:
+    #        st.write (f"{st.session_state.l_prod[-1]}, removido do carrinho.")
+    #        st.session_state.l_prod=[]
+    #        placeholder.empty()
+    #    else:    
+    #        st.write (f"{st.session_state.l_prod[-1]}, removido do carrinho.")
+    #        st.session_state.l_prod.pop()
+    #        placeholder.empty()  
+    #        placeholder.text("Carrinho:")
+    #        with placeholder.container():
+    #            st.write('Carrinho:')
+    #            for i in st.session_state.l_prod[0:-2]:
+    #                st.write(i)
+    #
+    #if st.button('Del carrinho',disabled=state):
+    #    st.session_state.l_prod=[]
+    #    st.write (f"Carrinho limpo.") 
+    #    placeholder.empty()
+
+
+    #return df_loja_recnp
 
             
-def f_carrinho():
-        import streamlit as st
-        placeholder = st.empty()
-        placeholder.text("Carrinho:")
+#def f_carrinho():
+#        import streamlit as st
+#        placeholder = st.empty()
+#        placeholder.text("Carrinho:")
 
-        with placeholder.container():
-            st.write('Carrinho:')
-            for i in st.session_state.l_prod:
-                st.write(i)
+#        with placeholder.container():
+#            st.write('Carrinho:')
+#            for i in st.session_state.l_prod:
+#                st.write(i)
 
       
 
