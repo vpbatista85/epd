@@ -115,7 +115,7 @@ def f_escolha(df):
         st.session_state.user=user
         add_page('teste_strealit_main.py', 'shop')
         time.sleep(5)
-        nav_page('teste_strealit_main.py')
+        nav_page('shop')
 
 
     ##Seleção dos campos referente ao produto:
