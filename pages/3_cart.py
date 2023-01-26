@@ -277,9 +277,9 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     df_predictions['u_id'] = user_id
     df_predictions['score'] = model.predict(df_predictions)
     df_predictions.sort_values(by='score', ascending=False).rename({'i_id': 'item_id'}, axis=1).set_index('item_id')
-    recommendations=df_predictions[['score']].head(n)
+    #recommendations=df_predictions[['score']].head(n)
 
-    return recommendations
+    return df_predictions[['score']].head(n)
 
 def rp_lfm():
     return recommendations  
