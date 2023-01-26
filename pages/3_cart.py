@@ -17,6 +17,9 @@ from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
 from sklearn.pipeline import Pipeline
 from sklearn.metrics.pairwise import cosine_similarity
+from surprise import KNNWithMeans
+from surprise import Dataset, NormalPredictor, Reader
+from surprise.model_selection import cross_validate
 
 
 def f_carrinho():
@@ -172,6 +175,117 @@ def rp_cv(df:pd.DataFrame,l_prod:list)-> pd.DataFrame:
 
     return recommendations
 
+def rp_iknn(df:pd.DataFrame,l_prod:list,user_id,n:int):
+    algo = KNNBasic()
+    df_k=df[df['loja_compra']=='7f58e7c0-fe90-4888-940c-52726a0a688a'].reset_index()
+    df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
+    df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
+    df_k['timestamp']=pd.to_datetime(df_k.dth_agendamento).map(pd.Timestamp.timestamp)
+    df_k=df_k[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_full','cliente_nome','timestamp']).count()
+    df_k.reset_index(inplace=True)
+    encoder=MinMaxScaler(feature_range=(1, df_k.produto_f.unique()[-1]))
+    df_k['rating']=pd.DataFrame(encoder.fit_transform(df_k.produto_f.array.reshape(-1, 1)))
+
+    df_kr=pd.DataFrame()
+    df_kr['userID']=df_k['cliente_nome']
+    df_kr['itemID']=df_k['produto_full']
+    df_kr['rating']=df_k['rating']
+    df_kr['timestamp']=df_k['timestamp']
+
+    reader = Reader(rating_scale=(1, df_k.produto_f.unique()[-1]))
+
+    train_size = 0.8
+    # Ordenar por timestamp
+    df_kr = df_kr.sort_values(by='timestamp', ascending=True)
+
+    # Definindo train e valid sets
+    df_train_set, df_valid_set = np.split(df_kr, [ int(train_size*df_kr.shape[0]) ])
+
+    train_set = (
+        Dataset
+        .load_from_df(df_train_set[['userID', 'itemID', 'rating']], reader)
+        .build_full_trainset()
+    )
+
+    valid_set = (
+        Dataset
+        .load_from_df(df_valid_set[['userID', 'itemID', 'rating']], reader)
+        .build_full_trainset()
+        .build_testset()
+    )
+
+    sim_options = {
+    "name": "pearson_baseline",
+    "user_based": False,  # compute similarities between items
+    }
+    model = KNNWithMeans(k=40, sim_options=sim_options, verbose=True)
+    model.fit(train_set)
+    
+    df_predictions = pd.DataFrame(columns=['item_id', 'score'])
+    for item_id in df_k.produto_full.values:
+        prediction = model.predict(uid=user_id, iid=item_id).est
+        df_predictions.loc[df_predictions.shape[0]] = [item_id, prediction]
+  
+    recommendations = (
+        df_predictions
+        .sort_values(by='score', ascending=False)
+        .head(n)
+        .set_index('item_id')
+        )
+
+
+
+    return recommendations
+
+def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
+    df_svd=df[df['loja_compra']=='7f58e7c0-fe90-4888-940c-52726a0a688a'].reset_index()
+    df_svd['produto_full']=df_svd['categoria']+" "+df_svd['tipo_categoria']+" "+df_svd['produto']+" "+df_svd['prodcomplemento']
+    df_svd['produto_f']=df_svd['produto']+" "+df_svd['prodcomplemento']
+    df_svd['timestamp']=pd.to_datetime(df_svd.dth_agendamento).map(pd.Timestamp.timestamp)
+    df_svd=df_svd[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_full','cliente_nome','timestamp']).count()
+    df_svd.reset_index(inplace=True)
+
+    encoder=MinMaxScaler(feature_range=(1, df_svd.produto_f.unique()[-1]))
+    df_svd['rating']=pd.DataFrame(encoder.fit_transform(df_svd.produto_f.array.reshape(-1, 1)))
+
+    train_size = 0.8
+    # Ordenar por timestamp
+    df_svd = df_svd.sort_values(by='timestamp', ascending=True)
+
+    # Definindo train e valid sets
+    df_train_set, df_valid_set = np.split(df_svd, [ int(train_size*df_kr.shape[0]) ])
+
+    df_train_set.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
+    df_valid_set.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
+
+    model = SVD(
+    lr=0.001, # Learning rate.
+    reg=0.005, # L2 regularization factor.
+    n_epochs=100, # Number of SGD iterations.
+    n_factors=30, # Number of latent factors.
+    early_stopping=True, # Whether or not to stop training based on a validation monitoring.
+    min_delta=0.0001, # Minimun delta to argue for an improvement.
+    shuffle=False, # Whether or not to shuffle the training set before each epoch.
+    min_rating=1, # Minimum value a rating should be clipped to at inference time.
+    max_rating=5 # Maximum value a rating should be clipped to at inference time.
+    )
+    model.fit(X=df_train_set, X_val=df_valid_set)
+    df_valid_set['prediction'] = model.predict(df_valid_set)
+
+    item_ids = df_valid_set['i_id'].unique()
+    df_predictions = pd.DataFrame()
+    df_predictions['i_id'] = item_ids
+    df_predictions['u_id'] = user_id
+    df_predictions['score'] = model.predict(df_predictions)
+    df_predictions.sort_values(by='score', ascending=False).rename({'i_id': 'item_id'}, axis=1).set_index('item_id')
+    recommendations=df_predictions[['score']].head(n)
+
+    return recommendations
+
+def rp_lfm():
+    return recommendations  
+
+
 def r_np(df_loja_recnp,l_prod): 
     if len(l_prod)==0:
         placeholder1 = st.empty() 
@@ -216,12 +330,51 @@ def r_np(df_loja_recnp,l_prod):
                         for i in rec_np.produto_f:
                             st.write(i)            
 
-def r_p(df_loja_recnp,l_prod):
+def r_p(df_loja_recnp,l_prod,user_id,n):
     if len(l_prod)==0:
         placeholder2 = st.empty() 
     else:
-        tab4, tab5 = st.tabs(["Co-visitation", 'Nearest Neighbors'])
+        tab4, tab5, tab6, tab7 = st.tabs(["Co-visitation", 'Item KNN','Funk-SVD','LightFM'])
         with tab4:          
+            rec_p=rp_cv(df_loja_recnp,l_prod)
+            placeholder2 = st.empty()
+            placeholder2.text("Quem comprou estes produtos também comprou:")
+            with placeholder2.container():
+                    if len(l_prod)>1:
+                        st.write("Quem comprou estes produtos também comprou:")
+                        for i in rec_p.item_id:
+                            st.write(i)
+                    else:
+                        st.write("Quem comprou este produto também comprou:")
+                        for i in rec_p.item_id:
+                            st.write(i)
+        with tab5: 
+            rec_p=rp_cv(df_loja_recnp,l_prod)
+            placeholder2 = st.empty()
+            placeholder2.text("Quem comprou estes produtos também comprou:")
+            with placeholder2.container():
+                    if len(l_prod)>1:
+                        st.write("Quem comprou estes produtos também comprou:")
+                        for i in rec_p.item_id:
+                            st.write(i)
+                    else:
+                        st.write("Quem comprou este produto também comprou:")
+                        for i in rec_p.item_id:
+                            st.write(i)
+        with tab6:
+            rec_p=rp_fsvd(df_loja_recnp,l_prod,user_id,n)
+            placeholder2 = st.empty()
+            placeholder2.text("Quem comprou estes produtos também comprou:")
+            with placeholder2.container():
+                    if len(l_prod)>1:
+                        st.write("Quem comprou estes produtos também comprou:")
+                        for i in rec_p.item_id:
+                            st.write(i)
+                    else:
+                        st.write("Quem comprou este produto também comprou:")
+                        for i in rec_p.item_id:
+                            st.write(i)
+        with tab7:
             rec_p=rp_cv(df_loja_recnp,l_prod)
             placeholder2 = st.empty()
             placeholder2.text("Quem comprou estes produtos também comprou:")
@@ -266,4 +419,4 @@ if st.button('Del carrinho',disabled=state):
 
 
 r_np(st.session_state.df_lrecnp,st.session_state.l_prod)
-r_p(st.session_state.df_lrecnp,st.session_state.l_prod)
+r_p(st.session_state.df_lrecnp,st.session_state.l_prod,st.session_state.user,5)
