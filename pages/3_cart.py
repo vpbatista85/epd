@@ -253,7 +253,7 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     df_svd = df_svd.sort_values(by='timestamp', ascending=True)
 
     # Definindo train e valid sets
-    df_train_set, df_valid_set = np.split(df_svd, [ int(train_size*df_kr.shape[0]) ])
+    df_train_set, df_valid_set = np.split(df_svd, [ int(train_size*df_svd.shape[0]) ])
 
     df_train_set.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
     df_valid_set.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
@@ -349,7 +349,7 @@ def r_p(df_loja_recnp,l_prod,user_id,n):
                         for i in rec_p.item_id:
                             st.write(i)
         with tab5: 
-            rec_p=rp_cv(df_loja_recnp,l_prod)
+            rec_p=rp_iknn(df_loja_recnp,l_prod)
             placeholder2 = st.empty()
             placeholder2.text("Quem comprou estes produtos também comprou:")
             with placeholder2.container():
