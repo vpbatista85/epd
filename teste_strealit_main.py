@@ -114,7 +114,7 @@ def f_escolha(df):
         st.session_state.store=store
         st.session_state.user=user
         add_page('teste_strealit_main.py', 'shop')
-        time.sleep(1)
+        #time.sleep(1)
         nav_page('shop')
 
 
