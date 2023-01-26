@@ -176,7 +176,6 @@ def rp_cv(df:pd.DataFrame,l_prod:list)-> pd.DataFrame:
     return recommendations
 
 def rp_iknn(df:pd.DataFrame,l_prod:list,user_id,n:int):
-    algo = KNNBasic()
     df_k=df[df['loja_compra']=='7f58e7c0-fe90-4888-940c-52726a0a688a'].reset_index()
     df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
     df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
@@ -207,12 +206,12 @@ def rp_iknn(df:pd.DataFrame,l_prod:list,user_id,n:int):
         .build_full_trainset()
     )
 
-    valid_set = (
-        Dataset
-        .load_from_df(df_valid_set[['userID', 'itemID', 'rating']], reader)
-        .build_full_trainset()
-        .build_testset()
-    )
+    #  valid_set = (
+    #     Dataset
+    #     .load_from_df(df_valid_set[['userID', 'itemID', 'rating']], reader)
+    #     .build_full_trainset()
+    #     .build_testset()
+    #)
 
     sim_options = {
     "name": "pearson_baseline",
