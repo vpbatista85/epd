@@ -354,11 +354,11 @@ def r_p(df_loja_recnp,l_prod,user_id,n):
             with placeholder2.container():
                     if len(l_prod)>1:
                         st.write("Quem comprou estes produtos também comprou:")
-                        for i in rec_p.item_id:
+                        for i in rec_p.index:
                             st.write(i)
                     else:
                         st.write("Quem comprou este produto também comprou:")
-                        for i in rec_p.item_id:
+                        for i in rec_p.index:
                             st.write(i)
         with tab6:
             rec_p=rp_fsvd(df_loja_recnp,l_prod,user_id,n)
@@ -367,11 +367,11 @@ def r_p(df_loja_recnp,l_prod,user_id,n):
             with placeholder2.container():
                     if len(l_prod)>1:
                         st.write("Quem comprou estes produtos também comprou:")
-                        for i in rec_p.item_id:
+                        for i in rec_p.index:
                             st.write(i)
                     else:
                         st.write("Quem comprou este produto também comprou:")
-                        for i in rec_p.item_id:
+                        for i in rec_p.index:
                             st.write(i)
         with tab7:
             rec_p=rp_cv(df_loja_recnp,l_prod)
