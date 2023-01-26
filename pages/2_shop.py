@@ -113,7 +113,7 @@ else:
 
     df_compl=df_prod[df_prod['prodcomplemento']==complement]
 
-    prodf=product+" "+str(complement)
+prodf=product+" "+str(complement)
 
 
 if st.button('Add carrinho'):
