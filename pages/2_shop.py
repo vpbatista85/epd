@@ -119,5 +119,7 @@ else:
 if st.button('Add carrinho'):
         st.write(prodf,"adicionado ao carrinho.")
         st.session_state.l_prod.append(prodf)
+
+if st.button('Carrinho'):
         add_page('teste_strealit_main.py', 'cart')
         nav_page('cart')
