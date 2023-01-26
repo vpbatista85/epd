@@ -264,6 +264,6 @@ if st.button('Del carrinho',disabled=state):
         st.write (f"Carrinho limpo.") 
         placeholder.empty()
 
-df_loja_recnp=st.session_state.df_lrecnp
-r_np(df_loja_recnp,st.session_state.l_prod)
-r_p(df_loja_recnp,st.session_state.l_prod)
+
+r_np(st.session_state.df_lrecnp,st.session_state.l_prod)
+r_p(st.session_state.df_lrecnp,st.session_state.l_prod)
