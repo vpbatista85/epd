@@ -1,6 +1,14 @@
 import streamlit as st
 import pandas as pd
 import teste_strealit_main
+from pathlib import Path
+from streamlit.source_util import (
+    page_icon_and_name, 
+    calc_md5, 
+    get_pages,
+    _on_pages_changed
+)
+from streamlit.components.v1 import html
 
 # create navigation
 def nav_page(page_name, timeout_secs=3):
