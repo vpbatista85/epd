@@ -29,6 +29,7 @@ from streamlit.components.v1 import html
 
 # create navigation
 def nav_page(page_name, timeout_secs=3):
+    #credits: https://stackoverflow.com/questions/73755240/streamlit-pages-on-button-press-not-on-sidebar
     nav_script = """
         <script type="text/javascript">
             function attempt_nav_page(page_name, start_time, timeout_secs) {
@@ -425,7 +426,7 @@ def main():
     df=df_server.copy()
     df.drop_duplicates(inplace=True)
     df.fillna("",inplace=True)
-    df_loja_recnp=f_escolha(df)
+    st.session_state.df_lrecnp=f_escolha(df)
     #f_carrinho()
     #r_np(df_loja_recnp,st.session_state.l_prod)
     #r_p(df_loja_recnp,st.session_state.l_prod)

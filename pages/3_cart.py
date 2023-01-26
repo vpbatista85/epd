@@ -242,7 +242,7 @@ if len(st.session_state.l_prod)==0:
 else:
         state=False
 
-df_loja_recnp=f_carrinho()
+f_carrinho()
 
 if st.button('Del item',disabled=state):
     if len(st.session_state.l_prod)==1:
@@ -264,5 +264,6 @@ if st.button('Del carrinho',disabled=state):
         st.write (f"Carrinho limpo.") 
         placeholder.empty()
 
+df_loja_recnp=st.session_state.df_lrecnp
 r_np(df_loja_recnp,st.session_state.l_prod)
 r_p(df_loja_recnp,st.session_state.l_prod)
