@@ -8,6 +8,7 @@ from collections import Counter
 import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
+import time
 
 
 from funk_svd import SVD
@@ -113,6 +114,7 @@ def f_escolha(df):
         st.session_state.store=store
         st.session_state.user=user
         add_page('teste_strealit_main.py', 'shop')
+        time.sleep(3)
         nav_page('teste_strealit_main.py')
 
 
