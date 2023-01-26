@@ -426,9 +426,9 @@ def main():
     df.drop_duplicates(inplace=True)
     df.fillna("",inplace=True)
     df_loja_recnp=f_escolha(df)
-    f_carrinho()
-    r_np(df_loja_recnp,st.session_state.l_prod)
-    r_p(df_loja_recnp,st.session_state.l_prod)
+    #f_carrinho()
+    #r_np(df_loja_recnp,st.session_state.l_prod)
+    #r_p(df_loja_recnp,st.session_state.l_prod)
 
 
 
