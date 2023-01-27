@@ -17,6 +17,9 @@ from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
 from sklearn.pipeline import Pipeline
 from sklearn.metrics.pairwise import cosine_similarity
+from surprise import KNNWithMeans
+from surprise import Dataset, NormalPredictor, Reader
+from surprise.model_selection import cross_validate
 
 from pathlib import Path
 from streamlit.source_util import (
