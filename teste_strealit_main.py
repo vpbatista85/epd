@@ -447,7 +447,7 @@ st.set_page_config(
 if 'l_prod' not in st.session_state:
     st.session_state.l_prod = []
 if __name__ == "__main__":
-     utils.main()
+     main()
 
 
 

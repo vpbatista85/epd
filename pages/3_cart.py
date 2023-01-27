@@ -395,7 +395,7 @@ if len(st.session_state.l_prod)==0:
 else:
         state=False
 
-utils.f_carrinho()
+f_carrinho()
 
 if st.button('Del item',disabled=state):
     if len(st.session_state.l_prod)==1:
@@ -418,5 +418,5 @@ if st.button('Del carrinho',disabled=state):
         placeholder.empty()
 
 
-utils.r_np(st.session_state.df_lrecnp,st.session_state.l_prod)
-utils.r_p(st.session_state.df_lrecnp,st.session_state.l_prod,st.session_state.user,5)
+r_np(st.session_state.df_lrecnp,st.session_state.l_prod)
+r_p(st.session_state.df_lrecnp,st.session_state.l_prod,st.session_state.user,5)
