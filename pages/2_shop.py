@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import *
+import utils
 # import pandas as pd
 # import teste_strealit_main
 # from pathlib import Path

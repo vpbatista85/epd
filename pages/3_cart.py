@@ -9,7 +9,7 @@ import streamlit as st
 # import matplotlib.pyplot as plt
 # import seaborn as sns
 # import time
-from utils import *
+import utils
 
 
 # from funk_svd import SVD

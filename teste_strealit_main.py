@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import *
+import utils
 # import pandas as pd
 # import numpy as np
 # import sklearn
@@ -447,7 +447,7 @@ st.set_page_config(
 if 'l_prod' not in st.session_state:
     st.session_state.l_prod = []
 if __name__ == "__main__":
-     main()
+     utils.main()
 
 
 
