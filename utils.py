@@ -507,10 +507,10 @@ def rp_lfm(df:pd.DataFrame,user_id,n:int):
 
     unique_f = []
     for i in df_lfdm.columns.to_list():
-    counter=0
-    while counter < len(df_lfdm[i].unique()):
-        col.append(i)
-        counter+=1
+        counter=0
+        while counter < len(df_lfdm[i].unique()):
+            col.append(i)
+            counter+=1
     for j in df_lfdm[i].unique():
         unique_f.append(j)  
     #print('f1:', unique_f1)
