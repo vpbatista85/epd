@@ -395,7 +395,7 @@ if len(st.session_state.l_prod)==0:
 else:
         state=False
 
-f_carrinho()
+utils.f_carrinho()
 
 if st.button('Del item',disabled=state):
     if len(st.session_state.l_prod)==1:
