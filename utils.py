@@ -225,6 +225,7 @@ def f_carrinho():
             st.write('Carrinho:')
             for i in st.session_state.l_prod:
                 st.write(i)
+
 def rnp_apr(dfs:pd.DataFrame,l_prod,n:int):
     #Recomendação não personalizada utilizando o algoritimo apriori.
     ##agrupando os pedidos
@@ -323,7 +324,7 @@ def rnp_cb(df:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
 
     return recommendations.head(n)         
 
-def rp_cv(df:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
+def rp_cv(df:pd.DataFrame, l_prod:list, n:int)-> pd.DataFrame:
     #preparando o dataframe para aplicação do algoritimo:
     dflg=df.reset_index()
     dflg['produto_full']=dflg['categoria']+" "+dflg['tipo_categoria']+" "+dflg['produto']+" "+dflg['prodcomplemento']
@@ -369,7 +370,7 @@ def rp_cv(df:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
 
     return recommendations.head(n)
 
-def rp_iknn(df:pd.DataFrame,l_prod:list,user_id,n:int):
+def rp_iknn(df:pd.DataFrame, l_prod:list, user_id, n:int):
     df_k=df.reset_index()
     df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
     df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
@@ -552,13 +553,13 @@ def rp_lfm(df:pd.DataFrame,user_id,n:int):
     return recommendations.head(n)  
 
 
-def r_np(df_loja_recnp,l_prod): 
+def r_np(df_loja_recnp,l_prod,n): 
     if len(l_prod)==0:
         placeholder1 = st.empty() 
     else:
         tab1, tab2, tab3 = st.tabs(["Apriori", "Top N","Content Based"])
         with tab1:          
-            rec_np=rnp_apr(df_loja_recnp,l_prod)
+            rec_np=rnp_apr(df_loja_recnp,l_prod,n)
             placeholder1 = st.empty()
             placeholder1.text("Quem comprou estes produtos também comprou:")
             if rec_np.shape[0]>0:
@@ -575,7 +576,7 @@ def r_np(df_loja_recnp,l_prod):
                 with placeholder1.container():
                         st.write("Sem proposições para este item")
         with tab2:
-            rec_np=rnp_top_n(df_loja_recnp,n=5,l_prod=l_prod)
+            rec_np=rnp_top_n(df_loja_recnp,l_prod=l_prod,n)
             placeholder1 = st.empty()
             placeholder1.text("Adicione ao carrinho os produtos mais vendidos:")
             with placeholder1.container():
@@ -583,7 +584,7 @@ def r_np(df_loja_recnp,l_prod):
                     for i in rec_np.produto_f:
                         st.write(i)
         with tab3:
-            rec_np=rnp_cb(df_loja_recnp,l_prod)
+            rec_np=rnp_cb(df_loja_recnp,l_prod,n)
             placeholder1 = st.empty()
             placeholder1.text("Quem comprou estes produtos também comprou:")
             with placeholder1.container():
