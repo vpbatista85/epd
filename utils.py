@@ -375,18 +375,18 @@ def rp_iknn(df:pd.DataFrame, l_prod:list, user_id, n:int):
     df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
     df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
     df_k['timestamp']=pd.to_datetime(df_k.dth_agendamento).map(pd.Timestamp.timestamp)
-    df_k=df_k[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_full','cliente_nome','timestamp']).count()
+    df_k=df_k[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_f','cliente_nome','timestamp']).count()
     df_k.reset_index(inplace=True)
-    encoder=MinMaxScaler(feature_range=(1, df_k.produto_f.unique()[-1]))
-    df_k['rating']=pd.DataFrame(encoder.fit_transform(df_k.produto_f.array.reshape(-1, 1)))
+    encoder=MinMaxScaler(feature_range=(1, df_k.produto_full.unique()[-1]))
+    df_k['rating']=pd.DataFrame(encoder.fit_transform(df_k.produto_full.array.reshape(-1, 1)))
 
     df_kr=pd.DataFrame()
     df_kr['userID']=df_k['cliente_nome']
-    df_kr['itemID']=df_k['produto_full']
+    df_kr['itemID']=df_k['produto_f']
     df_kr['rating']=df_k['rating']
     df_kr['timestamp']=df_k['timestamp']
 
-    reader = Reader(rating_scale=(1, df_k.produto_f.unique()[-1]))
+    reader = Reader(rating_scale=(1, df_k.produto_full.unique()[-1]))
 
     train_size = 0.8
     # Ordenar por timestamp
@@ -416,7 +416,7 @@ def rp_iknn(df:pd.DataFrame, l_prod:list, user_id, n:int):
     model.fit(train_set)
     
     df_predictions = pd.DataFrame(columns=['item_id', 'score'])
-    for item_id in df_k.produto_full.values:
+    for item_id in df_k.produto_f.values:
         prediction = model.predict(uid=user_id, iid=item_id).est
         df_predictions.loc[df_predictions.shape[0]] = [item_id, prediction]
   
