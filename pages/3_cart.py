@@ -20,7 +20,7 @@ utils.f_carrinho()
 
 if st.button('Del item',disabled=state):
     if len(st.session_state.l_prod)==1:
-        st.write (f"{st.session_state.l_prod}, removido do carrinho.")
+        st.write (f"{st.session_state.l_prod.values}, removido do carrinho.")
         st.session_state.l_prod=[]
         state=True
         #placeholder.empty()
