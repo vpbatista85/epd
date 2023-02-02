@@ -419,4 +419,4 @@ if st.button('Del carrinho',disabled=state):
 
 
 utils.r_np(st.session_state.df_lrecnp,st.session_state.l_prod)
-utils.r_p(st.session_state.df_lrecnp,st.session_state.l_prod,st.session_state.user,5)
+utils.r_p(st.session_state.df_lrecnp,st.session_state.l_prod,st.session_state.user,n=5)
