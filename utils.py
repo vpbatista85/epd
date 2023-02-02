@@ -445,7 +445,7 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     df_svd=df_svd[['produto_full','cliente_nome','produto_f','timestamp']].merge(df_svd_r[['rating']], left_index=True, right_index=True)
     #encoder=MinMaxScaler(feature_range=(1, df_svd.produto_f.unique()[-1]))
     encoder=MinMaxScaler(feature_range=(1, 5))
-    df_svd['rating']=pd.DataFrame(encoder.fit_transform(df_svd.produto_f.array.reshape(-1, 1)))
+    df_svd['rating']=pd.DataFrame(encoder.fit_transform(df_svd.rating.array.reshape(-1, 1)))
 
     train_size = 0.8
     # Ordenar por timestamp
