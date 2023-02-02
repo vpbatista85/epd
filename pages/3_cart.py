@@ -36,7 +36,7 @@ if st.button('Del item',disabled=state):
 if st.button('Del carrinho',disabled=state):
         st.session_state.l_prod=[]
         st.write (f"Carrinho limpo.") 
-        placeholder.empty()
+        #placeholder.empty()
 
 
 utils.r_np(st.session_state.df_lrecnp,st.session_state.l_prod,n=5)
