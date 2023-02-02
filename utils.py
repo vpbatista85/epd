@@ -225,7 +225,7 @@ def f_carrinho():
             st.write('Carrinho:')
             for i in st.session_state.l_prod:
                 st.write(i)
-def rnp_apr(dfs:pd.DataFrame,l_prod):
+def rnp_apr(dfs:pd.DataFrame,l_prod,n:int):
     #Recomendação não personalizada utilizando o algoritimo apriori.
     ##agrupando os pedidos
     df_l=dfs[['cod_pedido','produto_f']].groupby('cod_pedido').agg({'produto_f': lambda x : ','.join(set(x))})
@@ -253,9 +253,9 @@ def rnp_apr(dfs:pd.DataFrame,l_prod):
         recommendations=recommendations[recommendations.consequents.str.contains(i, regex=False)==False]
     recommendations.consequents.drop_duplicates(inplace=True)
    
-    return recommendations
+    return recommendations.head(n)
 
-def rnp_top_n(ratings:pd.DataFrame, n:int, l_prod:list) -> pd.DataFrame:
+def rnp_top_n(ratings:pd.DataFrame, l_prod:list, n:int) -> pd.DataFrame:
     #Recomendação não personalizada por n produtos mais consumidos.
     recommendations = (
         ratings
@@ -269,7 +269,7 @@ def rnp_top_n(ratings:pd.DataFrame, n:int, l_prod:list) -> pd.DataFrame:
       recommendations=recommendations[recommendations.produto_f.str.contains(i, regex=False)==False]
     return recommendations.head(n)  
 
-def rnp_cb(df:pd.DataFrame,l_prod:list)-> pd.DataFrame:
+def rnp_cb(df:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
     #preparando o dataframe para aplicação do algoritimo:
     dfl=df.reset_index()
     dfl['produto_full']=dfl['categoria']+" "+dfl['tipo_categoria']+" "+dfl['produto']+" "+dfl['prodcomplemento']
@@ -321,9 +321,9 @@ def rnp_cb(df:pd.DataFrame,l_prod:list)-> pd.DataFrame:
         else:
             recommendations=pd.concat([recommendations,r[1:5]])
 
-    return recommendations.head()         
+    return recommendations.head(n)         
 
-def rp_cv(df:pd.DataFrame,l_prod:list)-> pd.DataFrame:
+def rp_cv(df:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
     #preparando o dataframe para aplicação do algoritimo:
     dflg=df.reset_index()
     dflg['produto_full']=dflg['categoria']+" "+dflg['tipo_categoria']+" "+dflg['produto']+" "+dflg['prodcomplemento']
@@ -367,7 +367,7 @@ def rp_cv(df:pd.DataFrame,l_prod:list)-> pd.DataFrame:
         else:
             recommendations=pd.concat([recommendations,df_neighbors[1:6]])
 
-    return recommendations
+    return recommendations.head(n)
 
 def rp_iknn(df:pd.DataFrame,l_prod:list,user_id,n:int):
     df_k=df.reset_index()
@@ -422,13 +422,12 @@ def rp_iknn(df:pd.DataFrame,l_prod:list,user_id,n:int):
     recommendations = (
         df_predictions
         .sort_values(by='score', ascending=False)
-        .head(n)
         .set_index('item_id')
         )
 
 
 
-    return recommendations
+    return recommendations.head(n)
 
 def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     #df_svd=df[df['loja_compra']=='7f58e7c0-fe90-4888-940c-52726a0a688a'].reset_index()
@@ -482,9 +481,9 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     df_predictions.sort_values(by='score', ascending=False,inplace=True)
     df_predictions.rename(columns={'i_id': 'item_id'}, inplace=True)
     df_predictions.set_index('item_id',inplace=True)
-    recommendations=df_predictions.head(n)
+    recommendations=df_predictions
 
-    return recommendations
+    return recommendations.head(n)
 
 def rp_lfm(df:pd.DataFrame,user_id,n:int):
     """based on:
@@ -549,9 +548,8 @@ def rp_lfm(df:pd.DataFrame,user_id,n:int):
     recommendations['score']=score
     recommendations.set_index('items',inplace=True)
     recommendations.sort_values(by='score',ascending=False,inplace=True)
-    recommendations.head(n)
 
-    return recommendations  
+    return recommendations.head(n)  
 
 
 def r_np(df_loja_recnp,l_prod): 
