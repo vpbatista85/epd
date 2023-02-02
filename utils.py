@@ -223,8 +223,11 @@ def f_carrinho():
 
         with placeholder.container():
             st.write('Carrinho:')
-            for i in st.session_state.l_prod:
-                st.write(i)
+            if len(st.session_state.l_prod)<1:
+                st.write('O carrinho está vazio.')
+            else:
+                for i in st.session_state.l_prod:
+                    st.write(i)
 
 def rnp_apr(dfs:pd.DataFrame,l_prod,n:int):
     #Recomendação não personalizada utilizando o algoritimo apriori.
