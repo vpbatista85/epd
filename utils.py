@@ -603,7 +603,7 @@ def r_p(df_loja_recnp,l_prod,user_id,n):
     else:
         tab4, tab5, tab6, tab7 = st.tabs(["Co-visitation", 'Item KNN','Funk-SVD','LightFM'])
         with tab4:          
-            rec_p=rp_cv(df_loja_recnp,l_prod)
+            rec_p=rp_cv(df_loja_recnp,l_prod,n)
             placeholder2 = st.empty()
             placeholder2.text("Quem comprou estes produtos também comprou:")
             with placeholder2.container():
