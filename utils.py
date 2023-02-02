@@ -449,7 +449,7 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
 
     train_size = 0.8
     # Ordenar por timestamp
-    df_svd = df_svd.sort_values(by='timestamp', ascending=True, inplace=True)
+    df_svd.sort_values(by='timestamp', ascending=True, inplace=True)
 
     df_svd.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
     
@@ -470,7 +470,7 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     max_rating=5 # Maximum value a rating should be clipped to at inference time.
     )
     model.fit(X=df_train_set, X_val=df_valid_set)
-    df_valid_set['prediction'] = model.predict(df_test_set)
+    #df_valid_set['prediction'] = model.predict(df_test_set)
 
     #item_ids = df_valid_set['i_id'].unique()
     item_ids = df_svd['i_id'].unique()
