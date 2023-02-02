@@ -451,7 +451,7 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     # Ordenar por timestamp
     df_svd.sort_values(by='timestamp', ascending=True, inplace=True)
 
-    df_svd.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
+    df_svd.rename(columns={'cliente_nome': 'u_id', 'produto_f': 'i_id'},inplace=True)
     
 
     # Definindo train e valid sets
