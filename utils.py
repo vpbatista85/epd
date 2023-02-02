@@ -432,6 +432,7 @@ def rp_iknn(df:pd.DataFrame,l_prod:list,user_id,n:int):
 
 def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     #df_svd=df[df['loja_compra']=='7f58e7c0-fe90-4888-940c-52726a0a688a'].reset_index()
+    df_svd=df.copy()
     df_svd=df.reset_index()
     df_svd['produto_full']=df_svd['categoria']+" "+df_svd['tipo_categoria']+" "+df_svd['produto']+" "+df_svd['prodcomplemento']
     df_svd['produto_f']=df_svd['produto']+" "+df_svd['prodcomplemento']
