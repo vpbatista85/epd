@@ -444,13 +444,14 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
 
     train_size = 0.8
     # Ordenar por timestamp
-    df_svd = df_svd.sort_values(by='timestamp', ascending=True)
+    df_svd = df_svd.sort_values(by='timestamp', ascending=True, inplace=True)
+
+    df_svd.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
+    
 
     # Definindo train e valid sets
     df_train_set, df_valid_set = np.split(df_svd, [ int(train_size*df_svd.shape[0]) ])
-
-    df_train_set.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
-    df_valid_set.rename(columns={'cliente_nome': 'u_id', 'produto_full': 'i_id'},inplace=True)
+    df_valid_set, df_test_set = np.split(df_valid_set, [ int(0.5*df_valid_set.shape[0]) ])
 
     model = SVD(
     lr=0.001, # Learning rate.
@@ -464,13 +465,16 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     max_rating=5 # Maximum value a rating should be clipped to at inference time.
     )
     model.fit(X=df_train_set, X_val=df_valid_set)
-    df_valid_set['prediction'] = model.predict(df_valid_set)
+    df_valid_set['prediction'] = model.predict(df_test_set)
 
-    item_ids = df_valid_set['i_id'].unique()
+    #item_ids = df_valid_set['i_id'].unique()
+    item_ids = df_svd['i_id'].unique()
+    
     df_predictions = pd.DataFrame()
     df_predictions['i_id'] = item_ids
     df_predictions['u_id'] = user_id
-    df_predictions['score'] = model.predict(df_predictions)
+    #df_predictions['score'] = model.predict(df_predictions)
+    df_predictions['score'] = model.predict(df_svd)
     df_predictions.sort_values(by='score', ascending=False).rename({'i_id': 'item_id'}, axis=1).set_index('item_id')
     recommendations=df_predictions.head(n)
 
@@ -639,9 +643,9 @@ def r_p(df_loja_recnp,l_prod,user_id,n):
             with placeholder2.container():
                     if len(l_prod)>1:
                         st.write("Quem comprou estes produtos também comprou:")
-                        for i in rec_p.item_id:
+                        for i in rec_p.index:
                             st.write(i)
                     else:
                         st.write("Quem comprou este produto também comprou:")
-                        for i in rec_p.item_id:
+                        for i in rec_p.index:
                             st.write(i)
