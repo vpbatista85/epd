@@ -576,7 +576,7 @@ def r_np(df_loja_recnp,l_prod,n):
                 with placeholder1.container():
                         st.write("Sem proposições para este item")
         with tab2:
-            rec_np=rnp_top_n(df_loja_recnp,l_prod=l_prod,n)
+            rec_np=rnp_top_n(df_loja_recnp,l_prod=l_prod,n=n)
             placeholder1 = st.empty()
             placeholder1.text("Adicione ao carrinho os produtos mais vendidos:")
             with placeholder1.container():
