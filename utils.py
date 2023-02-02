@@ -437,9 +437,12 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
     df_svd['produto_full']=df_svd['categoria']+" "+df_svd['tipo_categoria']+" "+df_svd['produto']+" "+df_svd['prodcomplemento']
     df_svd['produto_f']=df_svd['produto']+" "+df_svd['prodcomplemento']
     df_svd['timestamp']=pd.to_datetime(df_svd.dth_agendamento).map(pd.Timestamp.timestamp)
-    df_svd=df_svd[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_full','cliente_nome','timestamp']).count()
-    df_svd.reset_index(inplace=True)
 
+    df_svd_r=df_svd[['produto_full','produto_f']].groupby(['produto_full']).count()
+    df_svd_r.reset_index(inplace=True)
+    df_svd_r.rename({'produto_f':'rating'}, axis=1,inplace=True)
+
+    df_svd=df_svd[['produto_full','cliente_nome','produto_f','timestamp']].merge(df_svd_r[['rating']], left_index=True, right_index=True)
     encoder=MinMaxScaler(feature_range=(1, df_svd.produto_f.unique()[-1]))
     df_svd['rating']=pd.DataFrame(encoder.fit_transform(df_svd.produto_f.array.reshape(-1, 1)))
 
