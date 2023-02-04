@@ -575,7 +575,9 @@ def rp_lfm(df:pd.DataFrame,user_id,n:int):
     return recommendations.head(n)  
 
 
-def r_np(df_loja_recnp,l_prod,n): 
+def r_np(df_loja_rec,l_prod,n,h): 
+    df_loja_recnp=extract_hour(df_loja_rec)
+    df_loja_recnp=time_filter(df_loja_recnp,hr=h)
     if len(l_prod)==0:
         placeholder1 = st.empty() 
     else:
@@ -619,7 +621,9 @@ def r_np(df_loja_recnp,l_prod,n):
                         for i in rec_np.produto_f:
                             st.write(i)            
 
-def r_p(df_loja_recnp,l_prod,user_id,n):
+def r_p(df_loja_rec,l_prod,user_id,n,h):
+    df_loja_recnp=extract_hour(df_loja_rec)
+    df_loja_recnp=time_filter(df_loja_recnp,hr=h)
     if len(l_prod)==0:
         placeholder2 = st.empty() 
     else:
