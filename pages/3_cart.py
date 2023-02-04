@@ -27,7 +27,7 @@ with st.sidebar:
     else:
        #hora=st.slider('Selecione o horário', min_value=0, max_value=24, value=None, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False)
         st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
-        hora=st.slider('Selecione o horário',min_value=time.min,max_value=time.max,step=timedelta(minutes=5),format="hh:mm",disabled=False)
+        hora=st.slider('Selecione o horário',min_value=time.min,max_value=time.max,step=timedelta(minutes=5),format="HH:MM",disabled=False)
 
 utils.f_carrinho()
 
