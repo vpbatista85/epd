@@ -15,7 +15,6 @@ import utils
 if 'clock' not in st.session_state:
      st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
 
-tm.sleep(0.3)
 
 if len(st.session_state.l_prod)==0:
         state=True
