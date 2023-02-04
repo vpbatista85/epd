@@ -27,7 +27,7 @@ with st.sidebar:
     horario=st.checkbox('Horario atual', value=True, key=None, help='Marque para usar o horário local', on_change=None, args=None, kwargs=None, disabled=False)
     if horario:
        st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
-       st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=(datetime.now()-timedelta(hours=3)).time(),format="HH:MM",step=timedelta(minutes=60),disabled=True)
+       st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=st.session_state.clock,format="HH:MM",step=timedelta(minutes=60),disabled=True)
        st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
        hora=st.session_state.clock
        st.write('Horário adotado:',hora)
