@@ -149,7 +149,7 @@ def f_escolha(df):
     df_loja=df[df['loja_compra']==store]
     df_loja_recnp=df_loja.copy()
     df_loja_recnp['dth_hora'] = df_loja_recnp['dth_agendamento'].apply(extract_hour)
-    df_loja_recnp=time_filter(df_loja_recnp)
+    df_loja_recnp=time_filter(df_loja_recnp, hr=)
     df_loja_recnp['produto_f']=df_loja_recnp['produto']+" "+df_loja_recnp['prodcomplemento']
 
     ##Seleção da categoria do produto
