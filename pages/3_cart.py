@@ -15,6 +15,8 @@ import utils
 if 'clock' not in st.session_state:
      st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
 
+tm.sleep(0.3)
+
 if len(st.session_state.l_prod)==0:
         state=True
 else:
@@ -28,15 +30,13 @@ with st.sidebar:
     if horario:
        st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
        st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=st.session_state.clock,format="HH:MM",step=timedelta(minutes=60),disabled=True)
-       #st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
-       tm.sleep(0.3)
+       st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
        hora=st.session_state.clock
        st.write('Horário adotado:',hora)
       
     else:
         st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
         st.session_state.clock=st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=st.session_state.clock,format="HH:MM",step=timedelta(minutes=60),disabled=False)
-        tm.sleep(0.3)
         hora=st.session_state.clock
         st.write('Horário adotado:',hora)
     
