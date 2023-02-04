@@ -18,18 +18,21 @@ else:
         state=False
 
 with st.sidebar:
+    if 'clock' not in st.session_state:
+        st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
     st.write('Simulação de periodo:')
     #clock=(datetime.now()-timedelta(hours=3))
     horario=st.checkbox('Horario atual', value=True, key=None, help='Marque para usar o horário local', on_change=None, args=None, kwargs=None, disabled=False)
     if horario:
        st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
-       hora=st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=(datetime.now()-timedelta(hours=3)).time(),step=timedelta(minutes=1),format="HH:MM",disabled=True)
+       st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=(datetime.now()-timedelta(hours=3)).time(),step=timedelta(minutes=1),format="HH:MM",disabled=True)
+       hora=st.session_state.clock
        #hora=st.slider('Selecione o horário', min_value=0, max_value=24,value=(datetime.now()-timedelta(hours=3)), step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=True)
     else:
        #hora=st.slider('Selecione o horário', min_value=0, max_value=24, value=None, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False)
         st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
-        hora=clock=st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=(datetime.now()-timedelta(hours=3)).time(),step=timedelta(minutes=5),format="HH:MM",disabled=False)
-        
+        st.session_state.clock=st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=(datetime.now()-timedelta(hours=3)).time(),step=timedelta(minutes=5),format="HH:MM",disabled=False)
+        hora=st.session_state.clock
     
     st.write('Horário adotado:',hora)
 
