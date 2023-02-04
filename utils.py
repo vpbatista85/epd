@@ -262,19 +262,23 @@ def rnp_apr(dfs:pd.DataFrame,l_prod,n:int):
     dft=pd.DataFrame(data=te_array,columns=encoder.columns_)
     frequent_items=apriori(dft,min_support=0.01,use_colnames=True)
     frequent_items['length'] = frequent_items['itemsets'].apply(lambda x: len(x))
-    rules=association_rules(frequent_items, metric='lift',min_threshold=1.0)
-    rules.sort_values(by='lift',ascending=False)
-    rules.antecedents=rules.antecedents.astype('string')
-    rules.consequents=rules.consequents.astype('string')
-    rules.antecedents=rules.antecedents.str.strip('frozenset({})')
-    rules.consequents=rules.consequents.str.strip('frozenset({})')
-    #recomendação
-    recommendations=pd.DataFrame(columns=rules.columns)
-    for i in l_prod:
-        recommendations=pd.concat([recommendations,rules[rules.antecedents.str.contains(i, regex=False)]],ignore_index=True)
-    for i in l_prod:
-        recommendations=recommendations[recommendations.consequents.str.contains(i, regex=False)==False]
-    recommendations.consequents.drop_duplicates(inplace=True)
+    try:
+        rules=association_rules(frequent_items, metric='lift',min_threshold=1.0)
+        rules.sort_values(by='lift',ascending=False)
+        rules.antecedents=rules.antecedents.astype('string')
+        rules.consequents=rules.consequents.astype('string')
+        rules.antecedents=rules.antecedents.str.strip('frozenset({})')
+        rules.consequents=rules.consequents.str.strip('frozenset({})')
+        #recomendação
+        recommendations=pd.DataFrame(columns=rules.columns)
+        for i in l_prod:
+            recommendations=pd.concat([recommendations,rules[rules.antecedents.str.contains(i, regex=False)]],ignore_index=True)
+        for i in l_prod:
+            recommendations=recommendations[recommendations.consequents.str.contains(i, regex=False)==False]
+        recommendations.consequents.drop_duplicates(inplace=True)
+    except ValueError:
+        recommendations=pd.DataFrame(columns=rules.columns)
+
    
     return recommendations.head(n)
 
