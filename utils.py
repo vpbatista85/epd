@@ -98,7 +98,7 @@ def extract_hour(release_date):
     at=datetime.strptime(release_date, "%Y-%m-%d %H:%M:%S.%f")
     return at.strftime("%H:%M")
   else:
-    df_loja_recnp.dth_agendamento=df_loja_recnp.dth_agendamento.astype('str')
+    df_loja_rec.dth_agendamento=df_loja_rec.dth_agendamento.astype('str')
     at=datetime.strptime(release_date, "%Y-%m-%d %H:%M:%S.%f")
     return at.strftime("%H:%M")
 
