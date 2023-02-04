@@ -103,6 +103,7 @@ def extract_hour(release_date):
     return at.strftime("%H:%M")
 
 def time_filter(df, hr=datetime.now()):
+    df.reset_index(inplace=True)
     df['dth_hora'] = pd.to_datetime(df['dth_hora'])
     ay=df['dth_hora'].iloc[0].year
     am=df['dth_hora'].iloc[0].month
