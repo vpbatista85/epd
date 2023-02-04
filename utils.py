@@ -103,11 +103,10 @@ def extract_hour(release_date):
     return at.strftime("%H:%M")
 
 def time_filter(df, hr=datetime.now()):
-    df.reset_index(inplace=True)
     df['dth_hora'] = pd.to_datetime(df['dth_hora'])
-    ay=df['dth_hora'].loc[0].year
-    am=df['dth_hora'].loc[0].month
-    ad=df['dth_hora'].loc[0].day
+    ay=df['dth_hora'][0].year
+    am=df['dth_hora'][0].month
+    ad=df['dth_hora'][0].day
     dfr=df[(df['dth_hora']>=(datetime(ay,am,ad,hr.hour,hr.minute)-timedelta(hours=2)))&(df['dth_hora']<=(datetime(ay,am,ad,hr.hour,hr.minute)+timedelta(hours=2)))].copy()
     dfr.dth_hora=dfr.dth_hora.astype('str')
     dfr.dth_hora.apply(lambda x : datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%H:%M"))
