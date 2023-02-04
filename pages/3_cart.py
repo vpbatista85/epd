@@ -19,11 +19,12 @@ else:
 
 with st.sidebar:
     st.write('Simulação de periodo:')
-    horario=st.checkbox('Horario atual', value=True, key=None, help='Marque para usar o horário local', on_change=None, args=None, kwargs=None, *, disabled=False, label_visibility="visible")
+    horario=st.checkbox('Horario atual', value=True, key=None, help='Marque para usar o horário local', on_change=None, args=None, kwargs=None, disabled=False, label_visibility="visible")
     if horario:
-       hora=st.slider('Selecione o horário', min_value=None, max_value=None, value=None, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, *, disabled=True, label_visibility="visible")
+       hora=st.slider('Selecione o horário', min_value=None, max_value=None, value=None, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=True, label_visibility="visible")
     else:
         st.write:(datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
+
 utils.f_carrinho()
 
 if st.button('Del item',disabled=state):
