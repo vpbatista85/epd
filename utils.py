@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import time
 import lightfm
+from datetime import datetime,  timedelta
 
 from funk_svd import SVD
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
@@ -92,6 +93,23 @@ def add_page(main_script_path_str, page_name):
     }
     _on_pages_changed.send()
 
+def extract_hour(release_date):
+  if type(release_date) == str:
+    at=datetime.strptime(release_date, "%Y-%m-%d %H:%M:%S")
+    return at.strftime("%H:%M")
+  else:
+    df.dth_agendamento=df.dth_agendamento.astype('str')
+    at=datetime.strptime(release_date, "%Y-%m-%d %H:%M:%S")
+    return at.strftime("%H:%M")
+
+def time_filter(df, hr=datetime.now()):
+    df['dth_hora'] = pd.to_datetime(df['dth_hora']) 
+    dfr=df[(df['dth_hora']>=(hr-timedelta(hours=2)))&(df['dth_hora']<=(hr+timedelta(hours=2)))].copy()
+    dfr.dth_hora=dfr.dth_hora.astype('str')
+    dfr.dth_hora.apply(lambda x : datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%H:%M"))
+    return dfr
+
+
 def f_escolha(df):
 
     delete_page("teste_strealit_main.py", "shop")
@@ -105,6 +123,7 @@ def f_escolha(df):
     store = st.selectbox(
         'Selecione a Loja:',
         df['loja_compra'].unique())
+
     ##Seleção do usuário:
     user= st.selectbox(
         'Selecione o usuário:',
@@ -129,6 +148,8 @@ def f_escolha(df):
     #st.write('Selecione o produto para o carrinho:')
     df_loja=df[df['loja_compra']==store]
     df_loja_recnp=df_loja.copy()
+    df_loja_recnp['dth_hora'] = df_loja_recnp['dth_agendamento'].apply(extract_hour)
+    df_loja_recnp=time_filter(df_loja_recnp)
     df_loja_recnp['produto_f']=df_loja_recnp['produto']+" "+df_loja_recnp['prodcomplemento']
 
     ##Seleção da categoria do produto

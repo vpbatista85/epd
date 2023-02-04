@@ -1,4 +1,5 @@
 import streamlit as st
+from datetime import datetime,  timedelta
 # import pandas as pd
 # import numpy as np
 # import sklearn
@@ -16,6 +17,13 @@ if len(st.session_state.l_prod)==0:
 else:
         state=False
 
+with st.sidebar:
+    st.write('Simulação de periodo:')
+    horario=st.checkbox('Horario atual', value=True, key=None, help='Marque para usar o horário local', on_change=None, args=None, kwargs=None, *, disabled=False, label_visibility="visible")
+    if horario:
+       hora=st.slider('Selecione o horário', min_value=None, max_value=None, value=None, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, *, disabled=True, label_visibility="visible")
+    else:
+        st.write:(datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
 utils.f_carrinho()
 
 if st.button('Del item',disabled=state):
