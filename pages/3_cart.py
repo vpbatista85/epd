@@ -19,7 +19,7 @@ else:
 
 with st.sidebar:
     st.write('Simulação de periodo:')
-    clock=(datetime.now()-timedelta(hours=3))
+    clock=(time.now()-timedelta(hours=3))
     horario=st.checkbox('Horario atual', value=True, key=None, help='Marque para usar o horário local', on_change=None, args=None, kwargs=None, disabled=False)
     if horario:
        st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
