@@ -67,7 +67,7 @@ if st.button('Del carrinho',disabled=state):
 df_loja_rec=st.session_state.df_lrecnp
 df_loja_rec['dth_hora'] = df_loja_rec['dth_agendamento'].apply(utils.extract_hour)
 df_loja_rec=utils.time_filter(df_loja_rec)
-print(df_loja_rec)
+
 st.write ('Quantidade de linhas apos o filtro de horario',df_loja_rec.shape[0]) 
 
 utils.r_np(df_loja_rec,st.session_state.l_prod,n=5,h=hora)
