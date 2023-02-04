@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import time
 import lightfm
-from datetime import datetime,  timedelta
+from datetime import datetime,  timedelta, date
 
 from funk_svd import SVD
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
@@ -104,7 +104,7 @@ def extract_hour(release_date):
 
 def time_filter(df, hr=datetime.now()):
     df['dth_hora'] = pd.to_datetime(df['dth_hora']) 
-    dfr=df[(df['dth_hora']>=(hr-timedelta(hours=2)))&(df['dth_hora']<=(hr+timedelta(hours=2)))].copy()
+    dfr=df[(df['dth_hora']>=(datetime.combine(date.today(),hr)-timedelta(hours=2)))&(df['dth_hora']<=(datetime.combine(date.today(),hr)+timedelta(hours=2)))].copy()
     dfr.dth_hora=dfr.dth_hora.astype('str')
     dfr.dth_hora.apply(lambda x : datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%H:%M"))
     return dfr
