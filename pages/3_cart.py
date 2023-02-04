@@ -12,14 +12,16 @@ from datetime import datetime,  timedelta, time
 # import time
 import utils
 
+if 'clock' not in st.session_state:
+     st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
+
 if len(st.session_state.l_prod)==0:
         state=True
 else:
         state=False
 
 with st.sidebar:
-    if 'clock' not in st.session_state:
-        st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
+
     st.write('Simulação de periodo:')
     #clock=(datetime.now()-timedelta(hours=3))
     horario=st.checkbox('Horario atual', value=True, key=None, help='Marque para usar o horário local', on_change=None, args=None, kwargs=None, disabled=False)
