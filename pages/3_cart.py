@@ -21,8 +21,9 @@ with st.sidebar:
     st.write('Simulação de periodo:')
     horario=st.checkbox('Horario atual', value=True, key=None, help='Marque para usar o horário local', on_change=None, args=None, kwargs=None, disabled=False)
     if horario:
-       st.write:(datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
-       hora=st.slider('Selecione o horário', min_value=0, max_value=24, value=None, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=True)
+       st.write:("Relógio:", datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
+       hora=st.slider('Selecione o horário', value=(datetime.now()-timedelta(hours=3)),format="%H:%M")
+       #hora=st.slider('Selecione o horário', min_value=0, max_value=24, value=None, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=True)
     else:
        hora=st.slider('Selecione o horário', min_value=0, max_value=24, value=None, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False)
 
