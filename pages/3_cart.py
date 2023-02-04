@@ -26,6 +26,7 @@ with st.sidebar:
     if horario:
        st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
        st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=(datetime.now()-timedelta(hours=3)).time(),format="HH:MM",disabled=True)
+       st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
        hora=st.session_state.clock
        st.write('Horário adotado:',hora)
        #hora=st.slider('Selecione o horário', min_value=0, max_value=24,value=(datetime.now()-timedelta(hours=3)), step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=True)
