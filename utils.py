@@ -277,7 +277,7 @@ def rnp_apr(dfs:pd.DataFrame,l_prod,n:int):
             recommendations=recommendations[recommendations.consequents.str.contains(i, regex=False)==False]
         recommendations.consequents.drop_duplicates(inplace=True)
     except ValueError:
-        recommendations=pd.DataFrame(columns=rules.columns)
+        recommendations=pd.DataFrame()
 
    
     return recommendations.head(n)
