@@ -576,8 +576,8 @@ def rp_lfm(df:pd.DataFrame,user_id,n:int):
 
 
 def r_np(df_loja_rec,l_prod,n,h): 
-    df_loja_recnp=extract_hour(df_loja_rec)
-    df_loja_recnp=time_filter(df_loja_recnp,hr=h)
+    df_loja_rec['dth_hora']=df_loja_rec['dth_agendamento'].apply(extract_hour)
+    df_loja_recnp=time_filter(df_loja_rec,hr=h)
     if len(l_prod)==0:
         placeholder1 = st.empty() 
     else:
