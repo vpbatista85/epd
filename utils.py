@@ -104,7 +104,7 @@ def extract_hour(release_date):
 
 def time_filter(df, hr=datetime.now()):
     df['dth_hora'] = pd.to_datetime(df['dth_hora'])
-    ay=df.dth_hora.dt.year[0]
+    ay=df.dth_hora.dt.year
     am=df['dth_hora'][1].month
     ad=df['dth_hora'][1].day
     dfr=df[(df['dth_hora']>=(datetime(ay,am,ad,hr.hour,hr.minute)-timedelta(hours=2)))&(df['dth_hora']<=(datetime(ay,am,ad,hr.hour,hr.minute)+timedelta(hours=2)))].copy()
