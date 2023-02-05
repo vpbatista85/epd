@@ -585,9 +585,10 @@ def rp_lfm(df:pd.DataFrame,user_id,n:int):
     return recommendations.head(n)  
 
 
-def r_np(df_loja_rec,l_prod,n,h): 
-    df_loja_rec['dth_hora']=df_loja_rec['dth_agendamento'].apply(extract_hour)
-    df_loja_recnp=time_filter(df_loja_rec,hr=h)
+def r_np(df_loja_rec,l_prod,n,h):
+    df_loja_rec1=df_loja_rec.copy()
+    df_loja_rec1['dth_hora']=df_loja_rec1['dth_agendamento'].apply(extract_hour)
+    df_loja_recnp=time_filter(df_loja_rec1,hr=h)
     st.write ('Quantidade de linhas apos antes do filtro de horario',df_loja_rec.shape[0])
     st.write ('Quantidade de linhas apos o filtro de horario',df_loja_recnp.shape[0])
     if len(l_prod)==0:
@@ -612,7 +613,7 @@ def r_np(df_loja_rec,l_prod,n,h):
                 with placeholder1.container():
                         st.write("Sem proposições para este item")
         with tab2:
-            rec_np=rnp_top_n(df_loja_recnp,l_prod=l_prod,n=n)
+            rec_np=rnp_top_n(df_loja_rec,l_prod=l_prod,n=n)
             placeholder1 = st.empty()
             placeholder1.text("Adicione ao carrinho os produtos mais vendidos:")
             with placeholder1.container():
@@ -620,7 +621,7 @@ def r_np(df_loja_rec,l_prod,n,h):
                     for i in rec_np.produto_f:
                         st.write(i)
         with tab3:
-            rec_np=rnp_cb(df_loja_recnp,l_prod,n)
+            rec_np=rnp_cb(df_loja_rec1,l_prod,n)
             placeholder1 = st.empty()
             placeholder1.text("Quem comprou estes produtos também comprou:")
             with placeholder1.container():
