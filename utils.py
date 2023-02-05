@@ -657,7 +657,7 @@ def r_np(df_loja_rec,l_prod,n,h):
                 with placeholder1.container():
                         st.write("Sem proposições para este item")
         with tab2:
-            rec_np=rnp_top_n(df_loja_rec,l_prod=l_prod,n=n)
+            rec_np=rnp_top_n(df_loja_recnp,l_prod=l_prod,n=n)
             placeholder1 = st.empty()
             placeholder1.text("Adicione ao carrinho os produtos mais vendidos:")
             with placeholder1.container():
@@ -665,7 +665,7 @@ def r_np(df_loja_rec,l_prod,n,h):
                     for i in rec_np.produto_f:
                         st.write(i)
         with tab3:
-            rec_np=rnp_cb(df_loja_rec1,l_prod,n)
+            rec_np=rnp_cb(df_loja_recnp,l_prod,n)
             placeholder1 = st.empty()
             placeholder1.text("Quem comprou estes produtos também comprou:")
             with placeholder1.container():
