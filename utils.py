@@ -400,7 +400,7 @@ def rp_cv(df:pd.DataFrame,df_f:pd.DataFrame, l_prod:list, n:int)-> pd.DataFrame:
                 recommendations=pd.concat([recommendations,df_neighbors[1:2]])
             else:
                 recommendations=pd.concat([recommendations,df_neighbors[1:6]])
-    except networkx.exception.NetworkXError:
+    except nx.exception.NetworkXError:
                 #preparando o dataframe para aplicação do algoritimo:
         dflg=df_f.reset_index()
         dflg['produto_full']=dflg['categoria']+" "+dflg['tipo_categoria']+" "+dflg['produto']+" "+dflg['prodcomplemento']
