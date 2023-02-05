@@ -588,6 +588,7 @@ def rp_lfm(df:pd.DataFrame,user_id,n:int):
 def r_np(df_loja_rec,l_prod,n,h): 
     df_loja_rec['dth_hora']=df_loja_rec['dth_agendamento'].apply(extract_hour)
     df_loja_recnp=time_filter(df_loja_rec,hr=h)
+    st.write ('Quantidade de linhas apos antes do filtro de horario',df_loja_rec.shape[0])
     st.write ('Quantidade de linhas apos o filtro de horario',df_loja_recnp.shape[0])
     if len(l_prod)==0:
         placeholder1 = st.empty() 
@@ -633,8 +634,8 @@ def r_np(df_loja_rec,l_prod,n,h):
                             st.write(i)            
 
 def r_p(df_loja_rec,l_prod,user_id,n,h):
-    df_loja_recnp=extract_hour(df_loja_rec)
-    df_loja_recnp=time_filter(df_loja_recnp,hr=h)
+    df_loja_rec['dth_hora']=df_loja_rec['dth_agendamento'].apply(extract_hour)
+    df_loja_recnp=time_filter(df_loja_rec,hr=h)
     if len(l_prod)==0:
         placeholder2 = st.empty() 
     else:
