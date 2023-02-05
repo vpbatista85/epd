@@ -30,14 +30,14 @@ with st.sidebar:
        st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
        st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=st.session_state.clock,format="HH:MM",step=timedelta(minutes=60),disabled=True)
        st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
-       hora=st.session_state.clock
-       st.write('Horário adotado:',hora)
+       #hora=st.session_state.clock
+       st.write('Horário adotado:',st.session_state.clock)
       
     else:
         st.write("Relógio:",datetime.strptime(str(datetime.now()-timedelta(hours=3)),"%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M"))
         st.session_state.clock=st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=st.session_state.clock,format="HH:MM",step=timedelta(minutes=60),disabled=False)
-        hora=st.session_state.clock
-        st.write('Horário adotado:',hora)
+        #hora=st.session_state.clock
+        st.write('Horário adotado:',st.session_state.clock)
     
     
 
@@ -70,5 +70,5 @@ df_loja_rec=st.session_state.df_lrecnp
 
  
 
-utils.r_np(df_loja_rec,st.session_state.l_prod,n=5,h=hora)
-utils.r_p(df_loja_rec,st.session_state.l_prod,st.session_state.user,n=5,h=hora)
+utils.r_np(df_loja_rec,st.session_state.l_prod,n=5,h=st.session_state.clock)
+utils.r_p(df_loja_rec,st.session_state.l_prod,st.session_state.user,n=5,h=st.session_state.clock)
