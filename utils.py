@@ -102,13 +102,13 @@ def extract_hour(release_date):
     at=datetime.strptime(release_date, "%Y-%m-%d %H:%M:%S.%f")
     return at.strftime("%H:%M")
 
-def time_filter(df, hr=datetime.now()):
+def time_filter(df, hr=datetime.now(),nh=0):
     df['dth_hora'] = pd.to_datetime(df['dth_hora'])
     ay=df.dth_hora.dt.year.max()
     am=df.dth_hora.dt.month.max()
     ad=df.dth_hora.dt.day.max()
-    up_l=datetime(ay,am,ad,hr.hour,hr.minute)
-    low_l=datetime(ay,am,ad,hr.hour,hr.minute)
+    up_l=datetime(ay,am,ad,hr.hour,hr.minute)+timedelta(hours=nh)
+    low_l=datetime(ay,am,ad,hr.hour,hr.minute)-timedelta(hours=nh)
     #dfr=df[(df.dth_hora>=(datetime(ay,am,ad,hr.hour,hr.minute)-timedelta(hours=2)))&(df.dth_hora<=(datetime(ay,am,ad,hr.hour,hr.minute)+timedelta(hours=2)))].copy()
     dfr=df[(df['dth_hora']>=low_l)&(df['dth_hora']<=up_l)].copy()
     dfr.dth_hora=dfr.dth_hora.astype('str')
@@ -588,7 +588,7 @@ def rp_lfm(df:pd.DataFrame,user_id,n:int):
 def r_np(df_loja_rec,l_prod,n,h):
     df_loja_rec1=df_loja_rec.copy()
     df_loja_rec1['dth_hora']=df_loja_rec1['dth_agendamento'].apply(extract_hour)
-    df_loja_recnp=time_filter(df_loja_rec1,hr=h)
+    df_loja_recnp=time_filter(df_loja_rec1,hr=h,nh=1)
     st.write ('Quantidade de linhas apos antes do filtro de horario',df_loja_rec.shape[0])
     st.write ('Quantidade de linhas apos o filtro de horario',df_loja_recnp.shape[0])
     if len(l_prod)==0:
@@ -636,7 +636,7 @@ def r_np(df_loja_rec,l_prod,n,h):
 
 def r_p(df_loja_rec,l_prod,user_id,n,h):
     df_loja_rec['dth_hora']=df_loja_rec['dth_agendamento'].apply(extract_hour)
-    df_loja_recnp=time_filter(df_loja_rec,hr=h)
+    df_loja_recnp=time_filter(df_loja_rec,hr=h,nh=1)
     if len(l_prod)==0:
         placeholder2 = st.empty() 
     else:
