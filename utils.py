@@ -307,7 +307,7 @@ def rnp_cb(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
     try:
         dfl=df.reset_index()
     except [IndexError, ValueError]:
-        dfl=df_f:pd.DataFrame.reset_index()
+        dfl=df_f.reset_index()
     dfl['produto_full']=dfl['categoria']+" "+dfl['tipo_categoria']+" "+dfl['produto']+" "+dfl['prodcomplemento']
     dfl['produto_f']=dfl['produto']+" "+dfl['prodcomplemento']
     BASE_FEATURES=['index','produto_f','produto_full']
