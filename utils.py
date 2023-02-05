@@ -302,9 +302,12 @@ def rnp_top_n(ratings:pd.DataFrame, l_prod:list, n:int) -> pd.DataFrame:
       recommendations=recommendations[recommendations.produto_f.str.contains(i, regex=False)==False]
     return recommendations.head(n)  
 
-def rnp_cb(df:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
+def rnp_cb(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
     #preparando o dataframe para aplicação do algoritimo:
-    dfl=df.reset_index()
+    try:
+        dfl=df.reset_index()
+    except [IndexError, ValueError]:
+        dfl=df_f:pd.DataFrame.reset_index()
     dfl['produto_full']=dfl['categoria']+" "+dfl['tipo_categoria']+" "+dfl['produto']+" "+dfl['prodcomplemento']
     dfl['produto_f']=dfl['produto']+" "+dfl['prodcomplemento']
     BASE_FEATURES=['index','produto_f','produto_full']
@@ -665,7 +668,7 @@ def r_np(df_loja_rec,l_prod,n,h):
                     for i in rec_np.produto_f:
                         st.write(i)
         with tab3:
-            rec_np=rnp_cb(df_loja_recnp,l_prod,n)
+            rec_np=rnp_cb(df_loja_recnp,df_loja_rec1,l_prod,n)
             placeholder1 = st.empty()
             placeholder1.text("Quem comprou estes produtos também comprou:")
             with placeholder1.container():
