@@ -356,49 +356,93 @@ def rnp_cb(df:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
 
     return recommendations.head(n)         
 
-def rp_cv(df:pd.DataFrame, l_prod:list, n:int)-> pd.DataFrame:
-    #preparando o dataframe para aplicação do algoritimo:
-    dflg=df.reset_index()
-    dflg['produto_full']=dflg['categoria']+" "+dflg['tipo_categoria']+" "+dflg['produto']+" "+dflg['prodcomplemento']
-    recommendations=pd.DataFrame(columns=['item_id', 'score'])
-
-    #criando o grafo:
-    n_users = dflg['cliente_nome'].unique()
-    n_items = dflg['produto_f'].unique()
-    G = nx.Graph()
-    G.add_nodes_from(n_items, node_type='item')
-    G.add_nodes_from(n_users, node_type='user')
-    G.add_edges_from(dflg[['cliente_nome','produto_f']].values)
-    recommendations=pd.DataFrame(columns=['item_id', 'score'])
-    for i in l_prod:
-        item_id=i
-        #Encontrando os itens vizinhos consumidos:
-        neighbors = G.neighbors(item_id)
-        neighbor_consumed_items = []
-        for user_id in neighbors:
-            user_consumed_items = G.neighbors(user_id)
-            neighbor_consumed_items += list(user_consumed_items)
-
-        #Contabilizando os items mais consumidos para criar o score da recomendação:
-        consumed_items_count = Counter(neighbor_consumed_items)
-
-        # Validando tipo do nó
-        node_type = nx.get_node_attributes(G, 'node_type')[item_id]
-        if node_type != 'item':
-            raise ValueError('Node is not of item type.')
-
-        # Contabilizando itens consumidos pelos vizinhos
-        consumed_items_count = Counter(neighbor_consumed_items)
-
-        # Criando dataframe
-        df_neighbors= pd.DataFrame(zip(consumed_items_count.keys(), consumed_items_count.values()))
-        df_neighbors.columns = ['item_id', 'score']
-        df_neighbors = df_neighbors.sort_values(by='score', ascending=False)
+def rp_cv(df:pd.DataFrame,df_f:pd.DataFrame, l_prod:list, n:int)-> pd.DataFrame:
+    try:
+        #preparando o dataframe para aplicação do algoritimo:
+        dflg=df.reset_index()
+        dflg['produto_full']=dflg['categoria']+" "+dflg['tipo_categoria']+" "+dflg['produto']+" "+dflg['prodcomplemento']
+        recommendations=pd.DataFrame(columns=['item_id', 'score'])
         
-        if len(l_prod)>1:
-            recommendations=pd.concat([recommendations,df_neighbors[1:2]])
-        else:
-            recommendations=pd.concat([recommendations,df_neighbors[1:6]])
+        #criando o grafo:
+        n_users = dflg['cliente_nome'].unique()
+        n_items = dflg['produto_f'].unique()
+        G = nx.Graph()
+        G.add_nodes_from(n_items, node_type='item')
+        G.add_nodes_from(n_users, node_type='user')
+        G.add_edges_from(dflg[['cliente_nome','produto_f']].values)
+        recommendations=pd.DataFrame(columns=['item_id', 'score'])
+        for i in l_prod:
+            item_id=i
+            #Encontrando os itens vizinhos consumidos:
+            neighbors = G.neighbors(item_id)
+            neighbor_consumed_items = []
+            for user_id in neighbors:
+                user_consumed_items = G.neighbors(user_id)
+                neighbor_consumed_items += list(user_consumed_items)
+
+            #Contabilizando os items mais consumidos para criar o score da recomendação:
+            consumed_items_count = Counter(neighbor_consumed_items)
+
+            # Validando tipo do nó
+            node_type = nx.get_node_attributes(G, 'node_type')[item_id]
+            if node_type != 'item':
+                raise ValueError('Node is not of item type.')
+
+            # Contabilizando itens consumidos pelos vizinhos
+            consumed_items_count = Counter(neighbor_consumed_items)
+
+            # Criando dataframe
+            df_neighbors= pd.DataFrame(zip(consumed_items_count.keys(), consumed_items_count.values()))
+            df_neighbors.columns = ['item_id', 'score']
+            df_neighbors = df_neighbors.sort_values(by='score', ascending=False)
+            
+            if len(l_prod)>1:
+                recommendations=pd.concat([recommendations,df_neighbors[1:2]])
+            else:
+                recommendations=pd.concat([recommendations,df_neighbors[1:6]])
+    except NetworkXError:
+                #preparando o dataframe para aplicação do algoritimo:
+        dflg=df_f.reset_index()
+        dflg['produto_full']=dflg['categoria']+" "+dflg['tipo_categoria']+" "+dflg['produto']+" "+dflg['prodcomplemento']
+        recommendations=pd.DataFrame(columns=['item_id', 'score'])
+        
+        #criando o grafo:
+        n_users = dflg['cliente_nome'].unique()
+        n_items = dflg['produto_f'].unique()
+        G = nx.Graph()
+        G.add_nodes_from(n_items, node_type='item')
+        G.add_nodes_from(n_users, node_type='user')
+        G.add_edges_from(dflg[['cliente_nome','produto_f']].values)
+        recommendations=pd.DataFrame(columns=['item_id', 'score'])
+        for i in l_prod:
+            item_id=i
+            #Encontrando os itens vizinhos consumidos:
+            neighbors = G.neighbors(item_id)
+            neighbor_consumed_items = []
+            for user_id in neighbors:
+                user_consumed_items = G.neighbors(user_id)
+                neighbor_consumed_items += list(user_consumed_items)
+
+            #Contabilizando os items mais consumidos para criar o score da recomendação:
+            consumed_items_count = Counter(neighbor_consumed_items)
+
+            # Validando tipo do nó
+            node_type = nx.get_node_attributes(G, 'node_type')[item_id]
+            if node_type != 'item':
+                raise ValueError('Node is not of item type.')
+
+            # Contabilizando itens consumidos pelos vizinhos
+            consumed_items_count = Counter(neighbor_consumed_items)
+
+            # Criando dataframe
+            df_neighbors= pd.DataFrame(zip(consumed_items_count.keys(), consumed_items_count.values()))
+            df_neighbors.columns = ['item_id', 'score']
+            df_neighbors = df_neighbors.sort_values(by='score', ascending=False)
+            
+            if len(l_prod)>1:
+                recommendations=pd.concat([recommendations,df_neighbors[1:2]])
+            else:
+                recommendations=pd.concat([recommendations,df_neighbors[1:6]])
 
     return recommendations.head(n)
 
@@ -635,14 +679,15 @@ def r_np(df_loja_rec,l_prod,n,h):
                             st.write(i)            
 
 def r_p(df_loja_rec,l_prod,user_id,n,h):
-    df_loja_rec['dth_hora']=df_loja_rec['dth_agendamento'].apply(extract_hour)
-    df_loja_recnp=time_filter(df_loja_rec,hr=h,nh=1)
+    df_loja_rec1=df_loja_rec.copy()
+    df_loja_rec1['dth_hora']=df_loja_rec1['dth_agendamento'].apply(extract_hour)
+    df_loja_recnp=time_filter(df_loja_rec1,hr=h,nh=1)
     if len(l_prod)==0:
         placeholder2 = st.empty() 
     else:
         tab4, tab5, tab6, tab7 = st.tabs(["Co-visitation", 'Item KNN','Funk-SVD','LightFM'])
         with tab4:          
-            rec_p=rp_cv(df_loja_recnp,l_prod,n)
+            rec_p=rp_cv(df_loja_recnp,df_loja_rec1,l_prod,n)
             placeholder2 = st.empty()
             placeholder2.text("Quem comprou estes produtos também comprou:")
             with placeholder2.container():
