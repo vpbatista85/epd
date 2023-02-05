@@ -354,7 +354,7 @@ def rnp_cb(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
                 recommendations=pd.concat([recommendations,r[1:2]])
             else:
                 recommendations=pd.concat([recommendations,r[1:5]])
-    except [IndexError, ValueError]:
+    except IndexError or ValueError:
         dfl=df_f.reset_index()
         dfl['produto_full']=dfl['categoria']+" "+dfl['tipo_categoria']+" "+dfl['produto']+" "+dfl['prodcomplemento']
         dfl['produto_f']=dfl['produto']+" "+dfl['prodcomplemento']
