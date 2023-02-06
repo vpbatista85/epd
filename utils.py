@@ -722,7 +722,7 @@ def rp_lfm(df:pd.DataFrame,df_f:pd.DataFrame,user_id,n:int):
         df_l.head()
 
         #preparando os dados:
-        df_lf=df.reset_index()
+        df_lf=df_f.reset_index()
         df_lfdm=pd.get_dummies(df_lf[['categoria','tipo_categoria','produto','prodcomplemento']])#features
         df_lf['produto_full']=df_lf['categoria']+" "+df_lf['tipo_categoria']+" "+df_lf['produto']+" "+df_lf['prodcomplemento']
         df_lf['produto_f']=df_lf['produto']+" "+df_lf['prodcomplemento']
