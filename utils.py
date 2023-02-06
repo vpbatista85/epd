@@ -243,6 +243,9 @@ def main():
     #f_carrinho()
     #r_np(df_loja_recnp,st.session_state.l_prod)
     #r_p(df_loja_recnp,st.session_state.l_prod)
+    st.session_state.df_lrecnp['dth_hora']=st.session_state.df_lrecnp['dth_agendamento'].apply(extract_hour)
+    
+
 
 def f_carrinho():
         import streamlit as st
