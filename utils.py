@@ -227,7 +227,7 @@ def f_escolha(df):
 
 
     return df_loja_recnp
-@st.cache(persist=True)
+
 def main():
     if 'l_prod' not in st.session_state:
         st.session_state.l_prod = []
