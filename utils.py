@@ -497,62 +497,103 @@ def rp_cv(df:pd.DataFrame,df_f:pd.DataFrame, l_prod:list, n:int)-> pd.DataFrame:
 
     return recommendations.head(n)
 
-def rp_iknn(df:pd.DataFrame, l_prod:list, user_id, n:int):
-    df_k=df.reset_index()
-    df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
-    df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
-    df_k['timestamp']=pd.to_datetime(df_k.dth_agendamento).map(pd.Timestamp.timestamp)
-    df_k=df_k[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_f','cliente_nome','timestamp']).count()
-    df_k.reset_index(inplace=True)
-    encoder=MinMaxScaler(feature_range=(1, df_k.produto_full.unique()[-1]))
-    df_k['rating']=pd.DataFrame(encoder.fit_transform(df_k.produto_full.array.reshape(-1, 1)))
+def rp_iknn(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list, user_id, n:int):
+    try:
+        df_k=df.reset_index()
+        df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
+        df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
+        df_k['timestamp']=pd.to_datetime(df_k.dth_agendamento).map(pd.Timestamp.timestamp)
+        df_k=df_k[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_f','cliente_nome','timestamp']).count()
+        df_k.reset_index(inplace=True)
+        encoder=MinMaxScaler(feature_range=(1, df_k.produto_full.unique()[-1]))
+        df_k['rating']=pd.DataFrame(encoder.fit_transform(df_k.produto_full.array.reshape(-1, 1)))
 
-    df_kr=pd.DataFrame()
-    df_kr['userID']=df_k['cliente_nome']
-    df_kr['itemID']=df_k['produto_f']
-    df_kr['rating']=df_k['rating']
-    df_kr['timestamp']=df_k['timestamp']
+        df_kr=pd.DataFrame()
+        df_kr['userID']=df_k['cliente_nome']
+        df_kr['itemID']=df_k['produto_f']
+        df_kr['rating']=df_k['rating']
+        df_kr['timestamp']=df_k['timestamp']
 
-    reader = Reader(rating_scale=(1, df_k.produto_full.unique()[-1]))
+        reader = Reader(rating_scale=(1, df_k.produto_full.unique()[-1]))
 
-    train_size = 0.8
-    # Ordenar por timestamp
-    df_kr = df_kr.sort_values(by='timestamp', ascending=True)
+        train_size = 0.8
+        # Ordenar por timestamp
+        df_kr = df_kr.sort_values(by='timestamp', ascending=True)
 
-    # Definindo train e valid sets
-    df_train_set, df_valid_set = np.split(df_kr, [ int(train_size*df_kr.shape[0]) ])
+        # Definindo train e valid sets
+        df_train_set, df_valid_set = np.split(df_kr, [ int(train_size*df_kr.shape[0]) ])
 
-    train_set = (
-        Dataset
-        .load_from_df(df_train_set[['userID', 'itemID', 'rating']], reader)
-        .build_full_trainset()
-    )
-
-    #  valid_set = (
-    #     Dataset
-    #     .load_from_df(df_valid_set[['userID', 'itemID', 'rating']], reader)
-    #     .build_full_trainset()
-    #     .build_testset()
-    #)
-
-    sim_options = {
-    "name": "pearson_baseline",
-    "user_based": False,  # compute similarities between items
-    }
-    model = KNNWithMeans(k=40, sim_options=sim_options, verbose=True)
-    model.fit(train_set)
-    
-    df_predictions = pd.DataFrame(columns=['item_id', 'score'])
-    for item_id in df_k.produto_f.values:
-        prediction = model.predict(uid=user_id, iid=item_id).est
-        df_predictions.loc[df_predictions.shape[0]] = [item_id, prediction]
-  
-    recommendations = (
-        df_predictions
-        .sort_values(by='score', ascending=False)
-        .set_index('item_id')
+        train_set = (
+            Dataset
+            .load_from_df(df_train_set[['userID', 'itemID', 'rating']], reader)
+            .build_full_trainset()
         )
 
+        sim_options = {
+        "name": "pearson_baseline",
+        "user_based": False,  # compute similarities between items
+        }
+        model = KNNWithMeans(k=40, sim_options=sim_options, verbose=True)
+        model.fit(train_set)
+        
+        df_predictions = pd.DataFrame(columns=['item_id', 'score'])
+        for item_id in df_k.produto_f.values:
+            prediction = model.predict(uid=user_id, iid=item_id).est
+            df_predictions.loc[df_predictions.shape[0]] = [item_id, prediction]
+    
+        recommendations = (
+            df_predictions
+            .sort_values(by='score', ascending=False)
+            .set_index('item_id')
+            )
+    except:
+        df_k=df_f.reset_index()
+        df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
+        df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
+        df_k['timestamp']=pd.to_datetime(df_k.dth_agendamento).map(pd.Timestamp.timestamp)
+        df_k=df_k[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_f','cliente_nome','timestamp']).count()
+        df_k.reset_index(inplace=True)
+        encoder=MinMaxScaler(feature_range=(1, df_k.produto_full.unique()[-1]))
+        df_k['rating']=pd.DataFrame(encoder.fit_transform(df_k.produto_full.array.reshape(-1, 1)))
+
+        df_kr=pd.DataFrame()
+        df_kr['userID']=df_k['cliente_nome']
+        df_kr['itemID']=df_k['produto_f']
+        df_kr['rating']=df_k['rating']
+        df_kr['timestamp']=df_k['timestamp']
+
+        reader = Reader(rating_scale=(1, df_k.produto_full.unique()[-1]))
+
+        train_size = 0.8
+        # Ordenar por timestamp
+        df_kr = df_kr.sort_values(by='timestamp', ascending=True)
+
+        # Definindo train e valid sets
+        df_train_set, df_valid_set = np.split(df_kr, [ int(train_size*df_kr.shape[0]) ])
+
+        train_set = (
+            Dataset
+            .load_from_df(df_train_set[['userID', 'itemID', 'rating']], reader)
+            .build_full_trainset()
+        )
+
+        sim_options = {
+        "name": "pearson_baseline",
+        "user_based": False,  # compute similarities between items
+        }
+        model = KNNWithMeans(k=40, sim_options=sim_options, verbose=True)
+        model.fit(train_set)
+        
+        df_predictions = pd.DataFrame(columns=['item_id', 'score'])
+        for item_id in df_k.produto_f.values:
+            prediction = model.predict(uid=user_id, iid=item_id).est
+            df_predictions.loc[df_predictions.shape[0]] = [item_id, prediction]
+    
+        recommendations = (
+            df_predictions
+            .sort_values(by='score', ascending=False)
+            .set_index('item_id')
+            )
 
 
     return recommendations.head(n)
