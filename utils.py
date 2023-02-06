@@ -737,8 +737,8 @@ def rp_lfm(df:pd.DataFrame,df_f:pd.DataFrame,user_id,n:int):
             while counter < len(df_lfdm[i].unique()):
                 col.append(i)
                 counter+=1
-        for j in df_lfdm[i].unique():
-            unique_f.append(j)  
+            for j in df_lfdm[i].unique():
+                unique_f.append(j)  
         #print('f1:', unique_f1)
         for x,y in zip(col, unique_f):
             res = str(x)+ ":" +str(y)
@@ -792,8 +792,8 @@ def rp_lfm(df:pd.DataFrame,df_f:pd.DataFrame,user_id,n:int):
             while counter < len(df_lfdm[i].unique()):
                 col.append(i)
                 counter+=1
-        for j in df_lfdm[i].unique():
-            unique_f.append(j)  
+            for j in df_lfdm[i].unique():
+                unique_f.append(j)  
         #print('f1:', unique_f1)
         for x,y in zip(col, unique_f):
             res = str(x)+ ":" +str(y)
