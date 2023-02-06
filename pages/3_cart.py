@@ -67,8 +67,10 @@ with st.sidebar:
         st.session_state.clock=st.slider('Selecione o horário',min_value=time.min,max_value=time.max,value=st.session_state.clock,format="HH:MM",step=timedelta(minutes=60),disabled=False)
         #hora=st.session_state.clock
         st.write('Horário adotado:',st.session_state.clock)
-    df_loja_filtrado=utils.time_filter(df_loja_rec,hr=st.session_state.clock,nh=1)
-    st.write ('Quantidade de linhas apos antes do filtro de horario',df_loja_rec.shape[0])
+    df_loja_af=df_loja_rec.copy()
+    df_loja_af['dth_hora']=df_loja_rec['dth_agendamento'].apply(extract_hour)
+    df_loja_filtrado=utils.time_filter(df_loja_af,hr=st.session_state.clock,nh=1)
+    st.write ('Quantidade de linhas apos antes do filtro de horario',df_loja_af.shape[0])
     st.write ('Quantidade de linhas apos o filtro de horario',df_loja_filtrado.shape[0])
 
  
