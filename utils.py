@@ -546,7 +546,7 @@ def rp_iknn(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list, user_id, n:int):
             .sort_values(by='score', ascending=False)
             .set_index('item_id')
             )
-    except:
+    except (IndexError,ValueError) as e:
         df_k=df_f.reset_index()
         df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
         df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
