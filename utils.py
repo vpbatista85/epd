@@ -654,63 +654,117 @@ def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
 
     return recommendations.head(n)
 
-def rp_lfm(df:pd.DataFrame,user_id,n:int):
+def rp_lfm(df:pd.DataFrame,df_f:pd.DataFrame,user_id,n:int):
     """based on:
         https://towardsdatascience.com/how-i-would-explain-building-lightfm-hybrid-recommenders-to-a-5-year-old-b6ee18571309
     """
-    dfl=df.reset_index()
-    df_l=dfl[['cod_pedido','produto_f']].groupby('cod_pedido').agg({'produto_f': lambda x : ','.join(set(x))})
-    df_l.rename(columns={'produto_f':'itens'},inplace=True)
-    df_l.reset_index(inplace=True)
-    df_l['itens']=df_l.itens.str.split(pat=',')
-    df_l.head()
+    try:
+        dfl=df.reset_index()
+        df_l=dfl[['cod_pedido','produto_f']].groupby('cod_pedido').agg({'produto_f': lambda x : ','.join(set(x))})
+        df_l.rename(columns={'produto_f':'itens'},inplace=True)
+        df_l.reset_index(inplace=True)
+        df_l['itens']=df_l.itens.str.split(pat=',')
+        df_l.head()
 
-    #preparando os dados:
-    df_lf=df.reset_index()
-    df_lfdm=pd.get_dummies(df_lf[['categoria','tipo_categoria','produto','prodcomplemento']])#features
-    df_lf['produto_full']=df_lf['categoria']+" "+df_lf['tipo_categoria']+" "+df_lf['produto']+" "+df_lf['prodcomplemento']
-    df_lf['produto_f']=df_lf['produto']+" "+df_lf['prodcomplemento']
-    df_lf['timestamp']=pd.to_datetime(df_lf.dth_agendamento).map(pd.Timestamp.timestamp)
-    df_lfc=df_lf[['cliente_nome']].merge(df_lf[['produto_f']],left_index=True,right_index=True)
-    df_lf=df_lfc.merge(df_lfdm,left_index=True, right_index=True)
-    df_lf=df_lf.groupby(['cliente_nome','produto_f']).sum()
-    df_lf.reset_index(inplace=True)
+        #preparando os dados:
+        df_lf=df.reset_index()
+        df_lfdm=pd.get_dummies(df_lf[['categoria','tipo_categoria','produto','prodcomplemento']])#features
+        df_lf['produto_full']=df_lf['categoria']+" "+df_lf['tipo_categoria']+" "+df_lf['produto']+" "+df_lf['prodcomplemento']
+        df_lf['produto_f']=df_lf['produto']+" "+df_lf['prodcomplemento']
+        df_lf['timestamp']=pd.to_datetime(df_lf.dth_agendamento).map(pd.Timestamp.timestamp)
+        df_lfc=df_lf[['cliente_nome']].merge(df_lf[['produto_f']],left_index=True,right_index=True)
+        df_lf=df_lfc.merge(df_lfdm,left_index=True, right_index=True)
+        df_lf=df_lf.groupby(['cliente_nome','produto_f']).sum()
+        df_lf.reset_index(inplace=True)
 
-    train_size = 0.8
-    # Definindo train e valid sets
-    train_lfm, test_lfm= np.split(df_lf, [ int(train_size*df_lf.shape[0]) ])
+        train_size = 0.8
+        # Definindo train e valid sets
+        train_lfm, test_lfm= np.split(df_lf, [ int(train_size*df_lf.shape[0]) ])
 
-    item_f = []
-    col=[]
+        item_f = []
+        col=[]
 
-    unique_f = []
-    for i in df_lfdm.columns.to_list():
-        counter=0
-        while counter < len(df_lfdm[i].unique()):
-            col.append(i)
-            counter+=1
-    for j in df_lfdm[i].unique():
-        unique_f.append(j)  
-    #print('f1:', unique_f1)
-    for x,y in zip(col, unique_f):
-        res = str(x)+ ":" +str(y)
-        item_f.append(res)
+        unique_f = []
+        for i in df_lfdm.columns.to_list():
+            counter=0
+            while counter < len(df_lfdm[i].unique()):
+                col.append(i)
+                counter+=1
+        for j in df_lfdm[i].unique():
+            unique_f.append(j)  
+        #print('f1:', unique_f1)
+        for x,y in zip(col, unique_f):
+            res = str(x)+ ":" +str(y)
+            item_f.append(res)
 
-    #creating the lfm dataset:
-    dataset = DT(user_identity_features=True, item_identity_features=False)
-    dataset.fit(train_lfm.cliente_nome.unique(),train_lfm.produto_f.unique(),item_features =item_f)
-    interactions, weights=dataset.build_interactions([(x[0], x[1]) for x in train_lfm.values])
+        #creating the lfm dataset:
+        dataset = DT(user_identity_features=True, item_identity_features=False)
+        dataset.fit(train_lfm.cliente_nome.unique(),train_lfm.produto_f.unique(),item_features =item_f)
+        interactions, weights=dataset.build_interactions([(x[0], x[1]) for x in train_lfm.values])
 
-    
+        
 
-    user_id_map, user_feature_map, item_id_map, item_feature_map = dataset.mapping()
-    model_lfm = LightFM(loss='warp')
+        user_id_map, user_feature_map, item_id_map, item_feature_map = dataset.mapping()
+        model_lfm = LightFM(loss='warp')
 
-    # predict for existing user
-    model_lfm.fit(interactions, user_features=None, item_features=None, sample_weight=None, epochs=10, num_threads=1, verbose=False)
-    user_x = user_id_map[user_id]
-    n_users, n_items = interactions.shape # no of users * no of items
-    score=model_lfm.predict(user_x, np.arange(n_items)) # means predict for all 
+        # predict for existing user
+        model_lfm.fit(interactions, user_features=None, item_features=None, sample_weight=None, epochs=10, num_threads=1, verbose=False)
+        user_x = user_id_map[user_id]
+        n_users, n_items = interactions.shape # no of users * no of items
+        score=model_lfm.predict(user_x, np.arange(n_items)) # means predict for all 
+
+    except (KeyError) as e:
+        dfl=df_f.reset_index()
+        df_l=dfl[['cod_pedido','produto_f']].groupby('cod_pedido').agg({'produto_f': lambda x : ','.join(set(x))})
+        df_l.rename(columns={'produto_f':'itens'},inplace=True)
+        df_l.reset_index(inplace=True)
+        df_l['itens']=df_l.itens.str.split(pat=',')
+        df_l.head()
+
+        #preparando os dados:
+        df_lf=df.reset_index()
+        df_lfdm=pd.get_dummies(df_lf[['categoria','tipo_categoria','produto','prodcomplemento']])#features
+        df_lf['produto_full']=df_lf['categoria']+" "+df_lf['tipo_categoria']+" "+df_lf['produto']+" "+df_lf['prodcomplemento']
+        df_lf['produto_f']=df_lf['produto']+" "+df_lf['prodcomplemento']
+        df_lf['timestamp']=pd.to_datetime(df_lf.dth_agendamento).map(pd.Timestamp.timestamp)
+        df_lfc=df_lf[['cliente_nome']].merge(df_lf[['produto_f']],left_index=True,right_index=True)
+        df_lf=df_lfc.merge(df_lfdm,left_index=True, right_index=True)
+        df_lf=df_lf.groupby(['cliente_nome','produto_f']).sum()
+        df_lf.reset_index(inplace=True)
+
+        train_size = 0.8
+        # Definindo train e valid sets
+        train_lfm, test_lfm= np.split(df_lf, [ int(train_size*df_lf.shape[0]) ])
+
+        item_f = []
+        col=[]
+
+        unique_f = []
+        for i in df_lfdm.columns.to_list():
+            counter=0
+            while counter < len(df_lfdm[i].unique()):
+                col.append(i)
+                counter+=1
+        for j in df_lfdm[i].unique():
+            unique_f.append(j)  
+        #print('f1:', unique_f1)
+        for x,y in zip(col, unique_f):
+            res = str(x)+ ":" +str(y)
+            item_f.append(res)
+
+        #creating the lfm dataset:
+        dataset = DT(user_identity_features=True, item_identity_features=False)
+        dataset.fit(train_lfm.cliente_nome.unique(),train_lfm.produto_f.unique(),item_features =item_f)
+        interactions, weights=dataset.build_interactions([(x[0], x[1]) for x in train_lfm.values])
+
+        user_id_map, user_feature_map, item_id_map, item_feature_map = dataset.mapping()
+        model_lfm = LightFM(loss='warp')
+
+        # predict for existing user
+        model_lfm.fit(interactions, user_features=None, item_features=None, sample_weight=None, epochs=10, num_threads=1, verbose=False)
+        user_x = user_id_map[user_id]
+        n_users, n_items = interactions.shape # no of users * no of items
+        score=model_lfm.predict(user_x, np.arange(n_items)) # means predict for all 
 
     recommendations=pd.DataFrame()
     recommendations['items']=item_id_map.keys()
