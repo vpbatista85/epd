@@ -872,7 +872,7 @@ def r_p(df_loja_rec,l_prod,user_id,n,h):
                         for i in rec_p.index:
                             st.write(i)
         with tab7:
-            rec_p=rp_lfm(df_loja_recnp,user_id,n)
+            rec_p=rp_lfm(df_loja_recnp,df_loja_rec1,user_id,n)
             placeholder2 = st.empty()
             placeholder2.text("Quem comprou estes produtos também comprou:")
             with placeholder2.container():
