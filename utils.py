@@ -826,8 +826,8 @@ def r_np(df_loja_rec,l_prod,n,h):
     df_loja_rec1=df_loja_rec.copy()
     df_loja_rec1['dth_hora']=df_loja_rec1['dth_agendamento'].apply(extract_hour)
     df_loja_recnp=time_filter(df_loja_rec1,hr=h,nh=1)
-    st.write ('Quantidade de linhas apos antes do filtro de horario',df_loja_rec.shape[0])
-    st.write ('Quantidade de linhas apos o filtro de horario',df_loja_recnp.shape[0])
+    #st.write ('Quantidade de linhas apos antes do filtro de horario',df_loja_rec.shape[0])
+    #st.write ('Quantidade de linhas apos o filtro de horario',df_loja_recnp.shape[0])
     if len(l_prod)==0:
         placeholder1 = st.empty() 
     else:
@@ -870,6 +870,7 @@ def r_np(df_loja_rec,l_prod,n,h):
                         st.write("Quem comprou este produto também comprou:")
                         for i in rec_np.produto_f:
                             st.write(i)            
+    return df_loja_rec.shape[0], df_loja_recnp.shape[0]
 
 def r_p(df_loja_rec,l_prod,user_id,n,h):
     df_loja_rec1=df_loja_rec.copy()
