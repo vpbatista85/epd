@@ -598,51 +598,95 @@ def rp_iknn(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list, user_id, n:int):
 
     return recommendations.head(n)
 
-def rp_fsvd(df:pd.DataFrame,l_prod:list,user_id,n:int):
-    #df_svd=df[df['loja_compra']=='7f58e7c0-fe90-4888-940c-52726a0a688a'].reset_index()
-    df_svd=df.copy()
-    df_svd=df.reset_index()
-    df_svd['produto_full']=df_svd['categoria']+" "+df_svd['tipo_categoria']+" "+df_svd['produto']+" "+df_svd['prodcomplemento']
-    df_svd['produto_f']=df_svd['produto']+" "+df_svd['prodcomplemento']
-    df_svd['timestamp']=pd.to_datetime(df_svd.dth_agendamento).map(pd.Timestamp.timestamp)
+def rp_fsvd(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list,user_id,n:int):
+    try:
+        df_svd=df.copy()
+        df_svd=df.reset_index()
+        df_svd['produto_full']=df_svd['categoria']+" "+df_svd['tipo_categoria']+" "+df_svd['produto']+" "+df_svd['prodcomplemento']
+        df_svd['produto_f']=df_svd['produto']+" "+df_svd['prodcomplemento']
+        df_svd['timestamp']=pd.to_datetime(df_svd.dth_agendamento).map(pd.Timestamp.timestamp)
 
-    df_svd_r=df_svd[['produto_full','produto_f']].groupby(['produto_full']).count()
-    df_svd_r.reset_index(inplace=True)
-    df_svd_r.rename({'produto_f':'rating'}, axis=1,inplace=True)
+        df_svd_r=df_svd[['produto_full','produto_f']].groupby(['produto_full']).count()
+        df_svd_r.reset_index(inplace=True)
+        df_svd_r.rename({'produto_f':'rating'}, axis=1,inplace=True)
 
-    df_svd=df_svd[['produto_full','cliente_nome','produto_f','timestamp']].merge(df_svd_r[['rating']], left_index=True, right_index=True)
-    #encoder=MinMaxScaler(feature_range=(1, df_svd.produto_f.unique()[-1]))
-    encoder=MinMaxScaler(feature_range=(1, 5))
-    df_svd['rating']=pd.DataFrame(encoder.fit_transform(df_svd.rating.array.reshape(-1, 1)))
+        df_svd=df_svd[['produto_full','cliente_nome','produto_f','timestamp']].merge(df_svd_r[['rating']], left_index=True, right_index=True)
+        #encoder=MinMaxScaler(feature_range=(1, df_svd.produto_f.unique()[-1]))
+        encoder=MinMaxScaler(feature_range=(1, 5))
+        df_svd['rating']=pd.DataFrame(encoder.fit_transform(df_svd.rating.array.reshape(-1, 1)))
 
-    train_size = 0.8
-    # Ordenar por timestamp
-    df_svd.sort_values(by='timestamp', ascending=True, inplace=True)
+        train_size = 0.8
+        # Ordenar por timestamp
+        df_svd.sort_values(by='timestamp', ascending=True, inplace=True)
 
-    df_svd.rename(columns={'cliente_nome': 'u_id', 'produto_f': 'i_id'},inplace=True)
-    
+        df_svd.rename(columns={'cliente_nome': 'u_id', 'produto_f': 'i_id'},inplace=True)
+        
 
-    # Definindo train e valid sets
-    df_train_set, df_valid_set = np.split(df_svd, [ int(train_size*df_svd.shape[0]) ])
-    df_valid_set, df_test_set = np.split(df_valid_set, [ int(0.5*df_valid_set.shape[0]) ])
+        # Definindo train e valid sets
+        df_train_set, df_valid_set = np.split(df_svd, [ int(train_size*df_svd.shape[0]) ])
+        df_valid_set, df_test_set = np.split(df_valid_set, [ int(0.5*df_valid_set.shape[0]) ])
 
-    model = SVD(
-    lr=0.001, # Learning rate.
-    reg=0.005, # L2 regularization factor.
-    n_epochs=100, # Number of SGD iterations.
-    n_factors=30, # Number of latent factors.
-    early_stopping=True, # Whether or not to stop training based on a validation monitoring.
-    min_delta=0.0001, # Minimun delta to argue for an improvement.
-    shuffle=False, # Whether or not to shuffle the training set before each epoch.
-    min_rating=1, # Minimum value a rating should be clipped to at inference time.
-    max_rating=5 # Maximum value a rating should be clipped to at inference time.
-    )
-    model.fit(X=df_train_set, X_val=df_valid_set)
-    #df_valid_set['prediction'] = model.predict(df_test_set)
+        model = SVD(
+        lr=0.001, # Learning rate.
+        reg=0.005, # L2 regularization factor.
+        n_epochs=100, # Number of SGD iterations.
+        n_factors=30, # Number of latent factors.
+        early_stopping=True, # Whether or not to stop training based on a validation monitoring.
+        min_delta=0.0001, # Minimun delta to argue for an improvement.
+        shuffle=False, # Whether or not to shuffle the training set before each epoch.
+        min_rating=1, # Minimum value a rating should be clipped to at inference time.
+        max_rating=5 # Maximum value a rating should be clipped to at inference time.
+        )
+        model.fit(X=df_train_set, X_val=df_valid_set)
+        #df_valid_set['prediction'] = model.predict(df_test_set)
 
-    #item_ids = df_valid_set['i_id'].unique()
-    item_ids = df_svd['i_id'].unique()
-    
+        #item_ids = df_valid_set['i_id'].unique()
+        item_ids = df_svd['i_id'].unique()
+    except (ValueError) as e:
+        df_svd=df_f.copy()
+        #df_svd=df.reset_index()
+        df_svd.reset_index()
+        df_svd['produto_full']=df_svd['categoria']+" "+df_svd['tipo_categoria']+" "+df_svd['produto']+" "+df_svd['prodcomplemento']
+        df_svd['produto_f']=df_svd['produto']+" "+df_svd['prodcomplemento']
+        df_svd['timestamp']=pd.to_datetime(df_svd.dth_agendamento).map(pd.Timestamp.timestamp)
+
+        df_svd_r=df_svd[['produto_full','produto_f']].groupby(['produto_full']).count()
+        df_svd_r.reset_index(inplace=True)
+        df_svd_r.rename({'produto_f':'rating'}, axis=1,inplace=True)
+
+        df_svd=df_svd[['produto_full','cliente_nome','produto_f','timestamp']].merge(df_svd_r[['rating']], left_index=True, right_index=True)
+        #encoder=MinMaxScaler(feature_range=(1, df_svd.produto_f.unique()[-1]))
+        encoder=MinMaxScaler(feature_range=(1, 5))
+        df_svd['rating']=pd.DataFrame(encoder.fit_transform(df_svd.rating.array.reshape(-1, 1)))
+
+        train_size = 0.8
+        # Ordenar por timestamp
+        df_svd.sort_values(by='timestamp', ascending=True, inplace=True)
+
+        df_svd.rename(columns={'cliente_nome': 'u_id', 'produto_f': 'i_id'},inplace=True)
+        
+
+        # Definindo train e valid sets
+        df_train_set, df_valid_set = np.split(df_svd, [ int(train_size*df_svd.shape[0]) ])
+        df_valid_set, df_test_set = np.split(df_valid_set, [ int(0.5*df_valid_set.shape[0]) ])
+
+        model = SVD(
+        lr=0.001, # Learning rate.
+        reg=0.005, # L2 regularization factor.
+        n_epochs=100, # Number of SGD iterations.
+        n_factors=30, # Number of latent factors.
+        early_stopping=True, # Whether or not to stop training based on a validation monitoring.
+        min_delta=0.0001, # Minimun delta to argue for an improvement.
+        shuffle=False, # Whether or not to shuffle the training set before each epoch.
+        min_rating=1, # Minimum value a rating should be clipped to at inference time.
+        max_rating=5 # Maximum value a rating should be clipped to at inference time.
+        )
+        model.fit(X=df_train_set, X_val=df_valid_set)
+        #df_valid_set['prediction'] = model.predict(df_test_set)
+
+        #item_ids = df_valid_set['i_id'].unique()
+        item_ids = df_svd['i_id'].unique()
+        
     df_predictions = pd.DataFrame()
     df_predictions['i_id'] = item_ids
     df_predictions['u_id'] = user_id
