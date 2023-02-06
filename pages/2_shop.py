@@ -1,6 +1,8 @@
 import streamlit as st
 import utils
 
+if 'l_prod' not in st.session_state:
+    st.session_state.l_prod = []
 # import pandas as pd
 # import teste_strealit_main
 # from pathlib import Path

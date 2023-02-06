@@ -12,6 +12,9 @@ from datetime import datetime,  timedelta, time
 import time as tm
 import utils
 
+if 'l_prod' not in st.session_state:
+    st.session_state.l_prod = []
+
 if 'clock' not in st.session_state:
      st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
 
