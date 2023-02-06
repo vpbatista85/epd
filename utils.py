@@ -233,7 +233,10 @@ def main():
     #lista de produtos no carrinho
     #df = pd.read_csv(r"C:\Users\vitor\Documents\Python\streamlit\Scripts\output.csv", encoding = 'utf-8')
     df_server= pd.read_csv(r"https://github.com/vpbatista85/epd/blob/main/output.csv?raw=true", encoding = 'utf-8')
-    df=df_server.copy()
+    #creating parquet file to try be faster on execution:
+    df.to_parquet('df.parquet.gzip',compression='gzip')
+    df=pd.read_parquet('df.parquet.gzip')
+    #df=df_server.copy()
     df.drop_duplicates(inplace=True)
     df.fillna("",inplace=True)
     st.session_state.df_lrecnp=f_escolha(df)
@@ -644,7 +647,7 @@ def rp_fsvd(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list,user_id,n:int):
         item_ids = df_svd['i_id'].unique()
     except (ValueError) as e:
         df_svd=df_f.copy()
-        #df_svd=df.reset_index()
+        df_svd=df_f.reset_index()
         df_svd.reset_index()
         df_svd['produto_full']=df_svd['categoria']+" "+df_svd['tipo_categoria']+" "+df_svd['produto']+" "+df_svd['prodcomplemento']
         df_svd['produto_f']=df_svd['produto']+" "+df_svd['prodcomplemento']
