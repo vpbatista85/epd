@@ -18,6 +18,8 @@ if 'l_prod' not in st.session_state:
 if 'clock' not in st.session_state:
      st.session_state.clock =(datetime.now()-timedelta(hours=3)).time()
 
+if 'df_lrecnp' not in st.session_state:
+    st.session_state.df_lrecnp
 
 if len(st.session_state.l_prod)==0:
         state=True
