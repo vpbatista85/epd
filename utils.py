@@ -234,7 +234,7 @@ def main():
     #df = pd.read_csv(r"C:\Users\vitor\Documents\Python\streamlit\Scripts\output.csv", encoding = 'utf-8')
     df_server= pd.read_csv(r"https://github.com/vpbatista85/epd/blob/main/output.csv?raw=true", encoding = 'utf-8')
     #creating parquet file to try be faster on execution:
-    df.to_parquet('df.parquet.gzip',compression='gzip')
+    df_server.to_parquet('df.parquet.gzip',compression='gzip')
     df=pd.read_parquet('df.parquet.gzip')
     #df=df_server.copy()
     df.drop_duplicates(inplace=True)
