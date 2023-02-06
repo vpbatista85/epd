@@ -70,8 +70,8 @@ with st.sidebar:
     df_loja_af=df_loja_rec.copy()
     df_loja_af['dth_hora']=df_loja_rec['dth_agendamento'].apply(utils.extract_hour)
     df_loja_filtrado=utils.time_filter(df_loja_af,hr=st.session_state.clock,nh=1)
-    st.write ('Quantidade de linhas apos antes do filtro de horario',df_loja_af.shape[0])
-    st.write ('Quantidade de linhas apos o filtro de horario',df_loja_filtrado.shape[0])
+    st.write ('Quantidade de linhas antes do filtro de horário',df_loja_af.shape[0])
+    st.write ('Quantidade de linhas apos o filtro de horário',df_loja_filtrado.shape[0])
 
  
 
