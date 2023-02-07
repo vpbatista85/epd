@@ -1104,6 +1104,7 @@ def m_topn(df_f):
 
     model_name = 'top'
     df_predictions = df_valid_set
+    df_predictions.rename({'cliente_nome':'user_id'}, axis=1)
     df_predictions['y_true'] = df_predictions.apply(lambda x: {'item_id': x['produto_f']}, axis=1)
     df_predictions = df_predictions.groupby('user_id').agg({'y_true': list})
     df_predictions['y_score'] = df_predictions.apply(lambda x: scores, axis=1)
