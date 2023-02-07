@@ -74,7 +74,14 @@ with st.sidebar:
     st.write ('Quantidade de linhas antes do filtro de horário',df_loja_af.shape[0])
     st.write ('Quantidade de linhas apos o filtro de horário',df_loja_filtrado.shape[0])
 
- 
+if  'df_loja_af' not in st.session_state:
+    st.session_state.df_loja_af
 
 utils.r_np(df_loja_rec,st.session_state.l_prod,n=5,h=st.session_state.clock)
 utils.r_p(df_loja_rec,st.session_state.l_prod,st.session_state.user,n=5,h=st.session_state.clock)
+utils.calc_m(df_loja_af,st.session_state.user)
+
+if st.button('Métricas'):
+        utils.add_page('teste_strealit_main.py', 'metrics')
+        utils.nav_page('metrics')
+

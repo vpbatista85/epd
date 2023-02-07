@@ -164,76 +164,6 @@ def f_escolha(df):
     df_loja_recnp=df_loja.copy()
     df_loja_recnp['produto_f']=df_loja_recnp['produto']+" "+df_loja_recnp['prodcomplemento']
 
-    ##Seleção da categoria do produto
-    #cat = st.selectbox(
-    #    'Selecione a categoria:',
-    #    df_loja.categoria.unique())
-    #df_cat=df_loja[df_loja['categoria']==cat]
-
-    ##Seleção do tipo do produto
-    #tipo = st.selectbox(
-    #    'Selecione o tipo:',
-    #    df_cat.tipo_categoria.unique())
-    #df_tipo=df_cat[df_cat['tipo_categoria']==tipo]
-    #Seleção do produto
-    #product=st.selectbox(
-    #    'Selecione o produto:',
-    #    df_tipo.produto.unique())
-    #df_prod=df_tipo[df_tipo['produto']==product]
-    #Seleção do complemento
-
-    #if df_prod.prodcomplemento.isin([""]).count()>=1 and len(df_prod.prodcomplemento.unique())==1:
-    #        p_dis=True
-    #        p_vis="collapsed"
-    #else:
-    #    p_dis=False
-    #    p_vis="visible"
-
-    #complement=st.selectbox(
-    #    'Selecione o complemento:',
-    #    df_prod.prodcomplemento.unique(),
-    #    disabled=p_dis,
-    #    label_visibility=p_vis)
-
-    #df_compl=df_prod[df_prod['prodcomplemento']==complement]
-
-    #prodf=product+" "+str(complement)
-
-
-    #if st.button('Add carrinho'):
-    #        st.write(prodf,"adicionado ao carrinho.")
-    #        st.session_state.l_prod.append(prodf)
-    #if st.button('Carrinho'):
-    #    add_page('teste_strealit_main.py', 'cart')
-    #    nav_page('cart')
-
-    ###########################################################
-    #movido para o script da segunda pagina '3_cart.py'
-    #if len(st.session_state.l_prod)==0:
-    #    state=True
-    #else:
-    #    state=False
-    #if st.button('Del item',disabled=state):
-    #    if len(st.session_state.l_prod)==1:
-    #        st.write (f"{st.session_state.l_prod[-1]}, removido do carrinho.")
-    #        st.session_state.l_prod=[]
-    #        placeholder.empty()
-    #    else:    
-    #        st.write (f"{st.session_state.l_prod[-1]}, removido do carrinho.")
-    #        st.session_state.l_prod.pop()
-    #        placeholder.empty()  
-    #        placeholder.text("Carrinho:")
-    #        with placeholder.container():
-    #            st.write('Carrinho:')
-    #            for i in st.session_state.l_prod[0:-2]:
-    #                st.write(i)
-    #
-    #if st.button('Del carrinho',disabled=state):
-    #    st.session_state.l_prod=[]
-    #    st.write (f"Carrinho limpo.") 
-    #    placeholder.empty()
-
-
     return df_loja_recnp
 
 def main():
@@ -949,6 +879,14 @@ def r_p(df_loja_rec,l_prod,user_id,n,h):
                             st.write(i)
 
 ##############  METRICAS #################################
+
+def calc_m(df_f,user_id):
+    m_topn(df_f)
+    m_iknn(df_f)
+    m_svd(df_f,user_id)
+
+    return
+
 def master_m(df_items):
     filepath = './valid_metrics.parquet'
     df = pd.read_parquet(filepath)
