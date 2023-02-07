@@ -1104,7 +1104,7 @@ def m_topn(df_f):
 
     model_name = 'top'
     df_predictions = df_valid_set
-    df_predictions['y_true'] = df_predictions.apply(lambda x: {'item_id': x['item_id'], 'rating': x['rating']}, axis=1)
+    df_predictions['y_true'] = df_predictions.apply(lambda x: {'produto_f': x['item_id'], 'rating': x['rating']}, axis=1)
     df_predictions = df_predictions.groupby('user_id').agg({'y_true': list})
     df_predictions['y_score'] = df_predictions.apply(lambda x: scores, axis=1)
     df_predictions['model'] = model_name
