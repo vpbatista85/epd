@@ -78,3 +78,7 @@ with st.sidebar:
 
 utils.r_np(df_loja_rec,st.session_state.l_prod,n=5,h=st.session_state.clock)
 utils.r_p(df_loja_rec,st.session_state.l_prod,st.session_state.user,n=5,h=st.session_state.clock)
+
+if st.button('Metrics'):
+        utils.add_page('teste_strealit_main.py', 'metrics')
+        utils.nav_page('metrics')
