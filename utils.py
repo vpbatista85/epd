@@ -7,10 +7,13 @@ import os
 from collections import Counter
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib
 import seaborn as sns
 #import time
 import lightfm
 from datetime import datetime,  timedelta, date
+from cycler import cycler
+matplotlib.rcParams['axes.prop_cycle'] = cycler(color=['#007efd', '#FFC000', '#303030'])
 
 from funk_svd import SVD
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
@@ -26,6 +29,9 @@ from lightfm.data import Dataset as DT
 from lightfm import LightFM
 from lightfm.evaluation import precision_at_k
 from lightfm.evaluation import auc_score as auc_score_lfm
+
+from rexmex.metrics.coverage import item_coverage
+from rexmex.metrics.ranking import mean_reciprocal_rank, personalization
 
 from pathlib import Path
 from streamlit.source_util import (
@@ -307,8 +313,9 @@ def rnp_top_n(ratings:pd.DataFrame, l_prod:list, n:int) -> pd.DataFrame:
         .rename({'cliente_nome': 'score'}, axis=1)
         .sort_values(by='score', ascending=False)
     )
-    for i in l_prod:
-      recommendations=recommendations[recommendations.produto_f.str.contains(i, regex=False)==False]
+    if l_prod != None:
+        for i in l_prod:
+            recommendations=recommendations[recommendations.produto_f.str.contains(i, regex=False)==False]
     return recommendations.head(n)  
 
 def rnp_cb(df:pd.DataFrame,df_f:pd.DataFrame,l_prod:list,n:int)-> pd.DataFrame:
@@ -938,3 +945,219 @@ def r_p(df_loja_rec,l_prod,user_id,n,h):
                         st.write("Quem comprou este produto também comprou:")
                         for i in rec_p.index:
                             st.write(i)
+
+##############  METRICAS #################################
+def master_m(df_items):
+    filepath = './valid_metrics.parquet'
+    df = pd.read_parquet(filepath)
+
+    RANKS = list(range(1, 21))
+
+    for i in df['model'].unique:
+        df_m = convert_coverage_metrics(df.query('model == @i'), rank=20)
+        df_metrics=pd.concat([df_metrics,df_m])
+
+    item_ids = df_items.produto_f.unique().tolist()
+    coverage_report = get_coverage_report(df, RANKS, item_ids)
+
+    return
+
+def convert_coverage_metrics(df, rank=20):
+  """recommended items"""
+  df_true = df
+  df_true = df_true.explode('y_true')[['model', 'user_id', 'y_true']]
+  df_true['item_id'] = df_true['y_true'].apply(lambda x: x.get('item_id'))
+  df_true['y_true'] = df_true['y_true'].apply(lambda x: x.get('rating'))
+
+  df_score = df
+  df_score = df_score.explode('y_score')[['model', 'user_id', 'y_score']]
+  df_score['item_id'] = df_score['y_score'].apply(lambda x: x.get('item_id'))
+  df_score['y_score'] = df_score['y_score'].apply(lambda x: x.get('score'))
+  df_score['y_score'] = df_true['y_true'].max() * df_score['y_score'] / df_score['y_score'].max()
+  
+  df_metrics = df_true.merge(df_score, on=['model', 'user_id', 'item_id'], how='outer')
+  df_metrics.sort_values(by=['user_id', 'y_score'], ascending=False, inplace=True)
+  df_metrics['rank'] = df_metrics.groupby(['model', 'user_id'])['y_score'].rank(method='first', ascending=False)
+  df_metrics = df_metrics.query('rank <= @rank')
+  df_metrics['y_true'] = df_metrics['y_true'].fillna(0)
+
+  return df_metrics[['model', 'user_id', 'item_id', 'y_true', 'y_score']].reset_index(drop=True)
+
+def get_coverage_report(df, ranks, item_ids):
+  coverage_report = pd.DataFrame(columns=['model', 'rank', 'item_coverage'])
+  for rank in ranks:
+    for i, model in enumerate(df['model'].unique()):
+      df_metrics = convert_coverage_metrics(
+          df.query('model == @model'),
+          rank=rank
+      )
+      user_ids = df_metrics['user_id'].unique().tolist()
+      user_items = df_metrics[['user_id', 'item_id']].values.tolist()
+      coverage = item_coverage((user_ids, item_ids), user_items)
+
+      coverage_report.loc[coverage_report.shape[0]] = [model, rank, coverage]
+
+  return coverage_report.sort_values(by=['model', 'rank']).reset_index(drop=True)
+
+def plot_report(report, figsize=(16,10)):
+  metrics = report.drop(['model', 'rank'], axis=1).columns
+  fig, axes = plt.subplots(nrows=len(metrics), ncols=1, sharex=True, figsize=figsize)
+  axes = [axes] if len(metrics) == 1 else axes
+  for i, metric in enumerate(metrics):
+    ax = axes[i]
+    for model in report['model'].unique():
+      df_plot = report.query('model == @model').sort_values(by='rank')
+      ax.plot(df_plot['rank'], df_plot[metric], label=model)
+      ax.scatter(df_plot['rank'], df_plot[metric])
+
+    ax.set_xticks([int(rank) for rank in df_plot['rank']])
+    ax.set_title(metric.title())
+    ax.legend()
+    ax.grid(True, linestyle='--')
+
+  ax.set_xlabel('Rank')
+  return st.pyplot(fig)
+
+
+def m_topn(df_f):
+    
+    recommendations = (
+        df_f
+        .groupby('produto_f')
+        .count()['cliente_nome']
+        .reset_index()
+        .rename({'cliente_nome': 'score'}, axis=1)
+        .sort_values(by='score', ascending=False)
+    )
+
+    train_size = 0.8
+    df_f.sort_values(by='dth_hora', inplace=True)
+    df_train_set, df_valid_set= np.split(df_f, [int(train_size * df_f.shape[0])])
+
+    recommendations = rnp_top_n(df_f, l_prod=None, n=20)
+    scores = [{'item_id': x['produto_f'], 'score': x['score']} for _, x in recommendations.iterrows()]
+
+    model_name = 'top'
+    df_predictions = df_valid_set
+    df_predictions['y_true'] = df_predictions.apply(lambda x: {'item_id': x['item_id'], 'rating': x['rating']}, axis=1)
+    df_predictions = df_predictions.groupby('user_id').agg({'y_true': list})
+    df_predictions['y_score'] = df_predictions.apply(lambda x: scores, axis=1)
+    df_predictions['model'] = model_name
+    df_predictions.reset_index(drop=False, inplace=True)
+
+    column_order = ['model', 'user_id', 'y_true', 'y_score']
+    df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
+
+    return
+
+def m_iknn(df_f):
+    model_name = 'itemknn'
+    n= 20
+
+    df_k=df_f.reset_index()
+    df_k['produto_full']=df_k['categoria']+" "+df_k['tipo_categoria']+" "+df_k['produto']+" "+df_k['prodcomplemento']
+    df_k['produto_f']=df_k['produto']+" "+df_k['prodcomplemento']
+    df_k['timestamp']=pd.to_datetime(df_k.dth_agendamento).map(pd.Timestamp.timestamp)
+    df_k=df_k[['produto_full','cliente_nome','produto_f','timestamp']].groupby(['produto_f','cliente_nome','timestamp']).count()
+    df_k.reset_index(inplace=True)
+    encoder=MinMaxScaler(feature_range=(1, df_k.produto_full.unique()[-1]))
+    df_k['rating']=pd.DataFrame(encoder.fit_transform(df_k.produto_full.array.reshape(-1, 1)))
+
+    df_kr=pd.DataFrame()
+    df_kr['userID']=df_k['cliente_nome']
+    df_kr['itemID']=df_k['produto_f']
+    df_kr['rating']=df_k['rating']
+    df_kr['timestamp']=df_k['timestamp']
+
+    reader = Reader(rating_scale=(1, df_k.produto_full.unique()[-1]))
+
+    train_size = 0.8
+    # Ordenar por timestamp
+    df_kr = df_kr.sort_values(by='timestamp', ascending=True)
+
+    # Definindo train e valid sets
+    df_train_set, df_valid_set = np.split(df_kr, [ int(train_size*df_kr.shape[0]) ])
+
+
+    df_recommendations = pd.DataFrame()
+    catalog = df_k.produto_full.values
+    for user_id in df_valid_set['userID'].unique():
+        user_known_items = df_train_set.query('userID == @user_id')['itemID'].unique()
+        recommendable_items = np.array(list(set(catalog)-set(user_known_items)))
+        user_recommendations = rp_iknn(df_f,df_f,l_prod=None, user_id=user_id,n=n).reset_index(drop=False)
+        user_recommendations['user_id'] = user_id
+        df_recommendations = pd.concat([df_recommendations, user_recommendations])
+
+    df_recommendations['model'] = model_name
+    df_recommendations = df_recommendations.merge(
+        df_valid_set,
+        left_on=['user_id', 'item_id'],
+        right_on=['userID', 'itemID'],
+        how='left'
+    )
+    df_recommendations = df_recommendations[['model', 'user_id', 'item_id', 'rating', 'score']]
+    df_recommendations['rating'] = df_recommendations['rating'].fillna(0)
+    df_rec_bkp = df_recommendations.copy()
+    
+    df_recommendations['y_score'] = df_recommendations.apply(lambda x: {'item_id': x['item_id'], 'score': x['score']}, axis=1)
+    df_recommendations = df_recommendations.groupby(['model', 'user_id']).agg({'y_score': list}).reset_index(drop=False)
+
+    df_predictions = df_valid_set.rename({'userID': 'user_id', 'itemID': 'item_id'}, axis=1)
+    df_predictions['y_true'] = df_predictions.apply(lambda x: {'item_id': x['item_id'], 'rating': x['rating']}, axis=1)
+    df_predictions = df_predictions.groupby('user_id').agg({'y_true': list}).reset_index(drop=False)
+    df_predictions = df_predictions.merge(df_recommendations, on='user_id', how='inner')
+
+    df_predictions.to_parquet(f'valid_{model_name}.parquet', index=None)
+    return
+
+
+def m_svd(df_f,user_id):
+    model_name = 'svd'
+    n = 20
+    df_svd=df_f.copy()
+    df_svd=df_f.reset_index()
+    df_svd.reset_index()
+    df_svd['produto_full']=df_svd['categoria']+" "+df_svd['tipo_categoria']+" "+df_svd['produto']+" "+df_svd['prodcomplemento']
+    df_svd['produto_f']=df_svd['produto']+" "+df_svd['prodcomplemento']
+    df_svd['timestamp']=pd.to_datetime(df_svd.dth_agendamento).map(pd.Timestamp.timestamp)
+
+    df_svd_r=df_svd[['produto_full','produto_f']].groupby(['produto_full']).count()
+    df_svd_r.reset_index(inplace=True)
+    df_svd_r.rename({'produto_f':'rating'}, axis=1,inplace=True)
+
+    df_svd=df_svd[['produto_full','cliente_nome','produto_f','timestamp']].merge(df_svd_r[['rating']], left_index=True, right_index=True)
+    #encoder=MinMaxScaler(feature_range=(1, df_svd.produto_f.unique()[-1]))
+    encoder=MinMaxScaler(feature_range=(1, 5))
+    df_svd['rating']=pd.DataFrame(encoder.fit_transform(df_svd.rating.array.reshape(-1, 1)))
+
+    # Ordenar por timestamp
+    df_svd.sort_values(by='timestamp', ascending=True, inplace=True)
+
+    df_svd.rename(columns={'cliente_nome': 'u_id', 'produto_f': 'i_id'},inplace=True)
+        
+    # Definindo train e valid sets
+    train_size=0.8
+    df_train_set, df_valid_set = np.split(df_svd, [ int(train_size*df_svd.shape[0]) ])
+    catalog = df_svd.produto_full.values
+    df_recommendations = pd.DataFrame()
+    for user_id in df_valid_set['u_id'].unique():
+        user_known_items = df_train_set.query('u_id == @user_id')['i_id'].unique()
+        recommendable_items = np.array(list(set(catalog)-set(user_known_items)))
+        
+        user_recommendations = rp_fsvd(df_f,df_f,l_prod=recommendable_items,user_id=user_id,n=n).reset_index(drop=False)
+        user_recommendations['user_id'] = user_id
+        df_recommendations = pd.concat([df_recommendations, user_recommendations])
+
+    df_recommendations['y_score'] = df_recommendations.apply(lambda x: {'item_id': x['item_id'], 'score': x['score']}, axis=1)
+    df_recommendations = df_recommendations.groupby('user_id').agg({'y_score': list}).reset_index(drop=False)
+
+    df_predictions = df_valid_set.rename({'u_id': 'user_id', 'i_id': 'item_id'}, axis=1)
+    df_predictions['y_true'] = df_predictions.apply(lambda x: {'item_id': x['item_id'], 'rating': x['rating']}, axis=1)
+    df_predictions = df_predictions.groupby('user_id').agg({'y_true': list}).reset_index(drop=False)
+    df_predictions = df_predictions.merge(df_recommendations, on='user_id', how='inner')
+    df_predictions['model'] = model_name
+    
+    column_order = ['model', 'user_id', 'y_true', 'y_score']
+    df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
+
+    return
