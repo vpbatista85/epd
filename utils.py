@@ -953,14 +953,13 @@ def master_m(df_items):
 
     RANKS = list(range(1, 21))
 
-    for i in df['model'].unique:
-        df_m = convert_coverage_metrics(df.query('model == @i'), rank=20)
-        df_metrics=pd.concat([df_metrics,df_m])
-
     item_ids = df_items.produto_f.unique().tolist()
     coverage_report = get_coverage_report(df, RANKS, item_ids)
+    ranking_report = get_ranking_report(df, RANKS)
+    classification_report = get_classification_report(df, RANKS)
 
-    return
+
+    return coverage_report, ranking_report, classification_report
 
 def convert_coverage_metrics(df, rank=20):
   """recommended items"""
@@ -983,6 +982,56 @@ def convert_coverage_metrics(df, rank=20):
 
   return df_metrics[['model', 'user_id', 'item_id', 'y_true', 'y_score']].reset_index(drop=True)
 
+def convert_ranking_metrics(df, rank=20):
+  """
+    y_true: recommended items that were consumed
+    y_score: recommended items within rank
+  """
+  df_true = df
+  df_true = df_true.explode('y_true')[['model', 'user_id', 'y_true']]
+  df_true['item_id'] = df_true['y_true'].apply(lambda x: x.get('item_id'))
+  df_true['y_true'] = df_true['y_true'].apply(lambda x: x.get('rating'))
+  df_true = df_true.query('y_true > 0')
+  df_true = df_true.groupby(['model', 'user_id']).agg({'item_id': list}).reset_index()
+  df_true.rename({'item_id': 'y_true'}, axis=1, inplace=True)
+
+  df_score = df
+  df_score = df_score.explode('y_score')[['model', 'user_id', 'y_score']]
+  df_score['item_id'] = df_score['y_score'].apply(lambda x: x.get('item_id'))
+  df_score['y_score'] = df_score['y_score'].apply(lambda x: x.get('score'))
+  df_score['rank'] = df_score.groupby(['model', 'user_id'])['y_score'].rank(method='first', ascending=False)
+  df_score = df_score.query('rank <= @rank')
+  df_score = df_score.groupby(['model', 'user_id']).agg({'item_id': list}).reset_index()
+  df_score.rename({'item_id': 'y_score'}, axis=1, inplace=True)
+  
+  df_metrics = df_score.merge(df_true, on=['model', 'user_id'], how='left')
+  df_metrics['y_true'] = df_metrics.apply(lambda x: list(set(x['y_true']).intersection(x['y_score'])), axis=1)
+  
+  return df_metrics[['model', 'user_id', 'y_true', 'y_score']].reset_index(drop=True)
+
+def convert_classification_metrics(df, threshold=1, rank=20):
+  """known or recommended items"""
+  df_score = df
+  df_score = df_score.explode('y_score')[['model', 'user_id', 'y_score']]
+  df_score['item_id'] = df_score['y_score'].apply(lambda x: x.get('item_id'))
+  df_score['y_score'] = df_score['y_score'].apply(lambda x: x.get('score'))
+  
+  # Normalize
+  df_score['y_score'] = df_score['y_score']/df_score['y_score'].max()
+
+  df_true = df
+  df_true = df_true.explode('y_true')[['model', 'user_id', 'y_true']]
+  df_true['item_id'] = df_true['y_true'].apply(lambda x: x.get('item_id'))
+  df_true['y_true'] = df_true['y_true'].apply(lambda x: x.get('rating'))
+  
+  df_metrics = df_true.merge(df_score, on=['model', 'user_id', 'item_id'], how='outer')
+  df_metrics.sort_values(by=['user_id', 'y_score'], ascending=False, inplace=True)
+  df_metrics['rank'] = df_metrics.groupby(['model', 'user_id'])['y_score'].rank(ascending=False)
+  df_metrics['y_score'] = df_metrics.apply(lambda x: x['y_score'] if x['rank'] <= rank else 0, axis=1) 
+  df_metrics['y_true'] = (df_metrics['y_true'] >= threshold).astype(int)
+
+  return df_metrics[['model', 'user_id', 'item_id', 'y_true', 'y_score']].reset_index(drop=True)
+
 def get_coverage_report(df, ranks, item_ids):
   coverage_report = pd.DataFrame(columns=['model', 'rank', 'item_coverage'])
   for rank in ranks:
@@ -998,6 +1047,43 @@ def get_coverage_report(df, ranks, item_ids):
       coverage_report.loc[coverage_report.shape[0]] = [model, rank, coverage]
 
   return coverage_report.sort_values(by=['model', 'rank']).reset_index(drop=True)
+
+def get_ranking_report(df, ranks):
+  ranking_report = pd.DataFrame(columns=['model', 'rank', 'mrr', 'personalization'])
+  for rank in ranks:
+    for i, model in enumerate(df['model'].unique()):
+      df_metrics = convert_ranking_metrics(
+          df.query('model == @model'),
+          rank=rank
+      )
+
+      mrr = df_metrics.apply(
+          lambda x: mean_reciprocal_rank(x["y_true"], x["y_score"]) if len(x['y_true']) > 0 and len(x['y_score']) else 0,
+          axis=1
+      ).mean()
+      pers = personalization(df_metrics['y_score'])
+      ranking_report.loc[ranking_report.shape[0]] = [model, rank, mrr, pers]
+
+  return ranking_report.sort_values(by=['model', 'rank']).reset_index(drop=True)
+
+def get_classification_report(df, ranks):
+  """Classification report for each rank and model"""
+  classification_report = pd.DataFrame(columns=['model', 'rank', 'precision', 'recall'])
+  for rank in ranks:
+    for i, model in enumerate(df['model'].unique()):
+      df_metrics = convert_classification_metrics(
+          df.query('model == @model'),
+          threshold=1,
+          rank=rank
+      )
+
+      precision = precision_score(df_metrics['y_true'], df_metrics['y_score'] >= 0.5)
+      recall = recall_score(df_metrics['y_true'], df_metrics['y_score'] >= 0.5)
+
+      classification_report.loc[classification_report.shape[0]] = [model, rank, precision, recall]
+
+  return classification_report.sort_values(by=['model', 'rank']).reset_index(drop=True)
+
 
 def plot_report(report, figsize=(16,10)):
   metrics = report.drop(['model', 'rank'], axis=1).columns
