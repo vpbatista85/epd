@@ -32,6 +32,8 @@ from lightfm.evaluation import auc_score as auc_score_lfm
 
 from rexmex.metrics.coverage import item_coverage
 from rexmex.metrics.ranking import mean_reciprocal_rank, personalization
+from rexmex.metrics.classification import precision_score, recall_score
+from rexmex.metrics.rating import root_mean_squared_error, mean_absolute_error
 
 from pathlib import Path
 from streamlit.source_util import (
@@ -957,9 +959,9 @@ def master_m(df_items):
     coverage_report = get_coverage_report(df, RANKS, item_ids)
     ranking_report = get_ranking_report(df, RANKS)
     classification_report = get_classification_report(df, RANKS)
+    rating_report = get_rating_report(df, RANKS)
 
-
-    return coverage_report, ranking_report, classification_report
+    return coverage_report, ranking_report, classification_report, rating_report
 
 def convert_coverage_metrics(df, rank=20):
   """recommended items"""
@@ -1032,6 +1034,26 @@ def convert_classification_metrics(df, threshold=1, rank=20):
 
   return df_metrics[['model', 'user_id', 'item_id', 'y_true', 'y_score']].reset_index(drop=True)
 
+def convert_rating_metrics(df, rank=20):
+  """known and recommended items"""
+  df_true = df
+  df_true = df_true.explode('y_true')[['model', 'user_id', 'y_true']]
+  df_true['item_id'] = df_true['y_true'].apply(lambda x: x.get('item_id'))
+  df_true['y_true'] = df_true['y_true'].apply(lambda x: x.get('rating'))
+
+  df_score = df
+  df_score = df_score.explode('y_score')[['model', 'user_id', 'y_score']]
+  df_score['item_id'] = df_score['y_score'].apply(lambda x: x.get('item_id'))
+  df_score['y_score'] = df_score['y_score'].apply(lambda x: x.get('score'))
+  df_score['y_score'] = df_true['y_true'].max() * df_score['y_score'] / df_score['y_score'].max()
+  
+  df_metrics = df_true.merge(df_score, on=['model', 'user_id', 'item_id'], how='outer')
+  df_metrics.sort_values(by=['user_id', 'y_score'], ascending=False, inplace=True)
+  df_metrics['rank'] = df_metrics.groupby(['model', 'user_id'])['y_score'].rank(method='first', ascending=False)
+  df_metrics = df_metrics.query('y_true > 0 and rank <= @rank')
+
+  return df_metrics[['model', 'user_id', 'item_id', 'y_true', 'y_score']].reset_index(drop=True)
+
 def get_coverage_report(df, ranks, item_ids):
   coverage_report = pd.DataFrame(columns=['model', 'rank', 'item_coverage'])
   for rank in ranks:
@@ -1083,6 +1105,25 @@ def get_classification_report(df, ranks):
       classification_report.loc[classification_report.shape[0]] = [model, rank, precision, recall]
 
   return classification_report.sort_values(by=['model', 'rank']).reset_index(drop=True)
+
+def get_rating_report(df, ranks):
+  """Rating report for each rank and model"""
+  rating_report = pd.DataFrame(columns=['model', 'rank', 'rmse', 'mae'])
+  for rank in ranks:
+    for i, model in enumerate(df['model'].unique()):
+      df_metrics = convert_rating_metrics(
+          df.query('model == @model'),
+          rank=rank
+      )
+
+      if df_metrics.shape[0] == 0:
+        rmse, mae = 0, 0
+      else:
+        rmse = root_mean_squared_error(df_metrics['y_true'], df_metrics['y_score'])
+        mae = mean_absolute_error(df_metrics['y_true'], df_metrics['y_score'])
+
+      rating_report.loc[rating_report.shape[0]] = [model, rank, rmse, mae]
+  return rating_report.sort_values(by=['model', 'rank']).reset_index(drop=True)
 
 
 def plot_report(report, figsize=(16,10)):
