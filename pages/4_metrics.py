@@ -2,7 +2,7 @@ import streamlit as st
 import utils
 
 
-coverage_report, ranking_report, classification_report, rating_report= utils.master_m(st.session_state.df_loja_af)
+coverage_report, ranking_report, classification_report, rating_report= utils.master_m(st.session_state.df_lrecnp)
 
 
 st.title('Métricas de Acurácia')
