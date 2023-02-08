@@ -890,7 +890,7 @@ def r_p(df_loja_rec,l_prod,user_id,n,h):
 
 ##############  METRICAS #################################
 
-def calc_m(df_f,user_id):
+def calc_m(df_f):
     print('entered on calc_m')
     with redirect_stdout(io.StringIO()) as stdout_f:
         stdout_f.write('entered on calc_m')
@@ -902,7 +902,7 @@ def calc_m(df_f,user_id):
     print('Item knn finished')
     with redirect_stdout(io.StringIO()) as stdout_f:
         stdout_f.write('Item knn finished')    
-    m_svd(df_f,user_id)
+    m_svd(df_f)
     print('funk-svd finished')
     with redirect_stdout(io.StringIO()) as stdout_f:
         stdout_f.write('funk-svd finished')    
@@ -918,7 +918,7 @@ def master_m(df_items):
             final_files.append(file)
       except:
         print('Exception while reading file')
-    df_metrics=pd.DataFrame(columns=['model','user_id',' y_true','y_score'])
+    df_metrics=pd.DataFrame()
     for i in  final_files:
       dff = pd.read_parquet(os.getcwd()+'/'+i)
       df_metrics=pd.concat([df_metrics,dff])
@@ -1209,7 +1209,7 @@ def m_iknn(df_f):
     return
 
 
-def m_svd(df_f,user_id):
+def m_svd(df_f):
     model_name = 'svd'
     n = 20
     df_svd=df_f.copy()

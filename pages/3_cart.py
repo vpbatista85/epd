@@ -86,7 +86,7 @@ if  'df_loja_af' not in st.session_state:
 
 utils.r_np(df_loja_rec,st.session_state.l_prod,n=5,h=st.session_state.clock)
 utils.r_p(df_loja_rec,st.session_state.l_prod,st.session_state.user,n=5,h=st.session_state.clock)
-utils.calc_m(df_loja_af,st.session_state.user)
+utils.calc_m(df_loja_af)
 
 if st.button('Métricas'):
         utils.add_page('teste_strealit_main.py', 'metrics')
