@@ -182,7 +182,7 @@ def main():
     #df=df_server.copy()
     df.drop_duplicates(inplace=True)
     df.fillna("",inplace=True)
-    #st.session_state.df_lrecnp=f_escolha(df)
+    st.session_state.df_lrecnp=f_escolha(df)
     #f_carrinho()
     #r_np(df_loja_recnp,st.session_state.l_prod)
     #r_p(df_loja_recnp,st.session_state.l_prod)
