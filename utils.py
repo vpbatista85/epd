@@ -891,15 +891,20 @@ def calc_m(df_f,user_id):
     return
 
 def master_m(df_items):
-    filepath = './'
-
-    for p in Path(filepath).glob('**/*.parquet'):
-        df_metrics=pd.DataFrame()
-        dff = pd.read_parquet(p)
-        df_metrics=pd.concat(dff)
+    filepath = '*.parquet'
+    search_word = 'valid'
+    final_files = []
+    for file in glob.glob(filepath, recursive=True):
+      try:
+        if search_word in file:
+            final_files.append(file)
+      except:
+        print('Exception while reading file')
+    df_metrics=pd.DataFrame(columns=['model','user_id',' y_true','y_score'])
+    for i in  final_files:
+      dff = pd.read_parquet(os.getcwd()+'/'+i)
+      df_metrics=pd.concat([df_metrics,dff])
     
-    #df = pd.read_parquet(filepath)
-
     RANKS = list(range(1, 21))
 
     item_ids = df_items.produto_f.unique().tolist()
