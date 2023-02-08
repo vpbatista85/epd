@@ -885,8 +885,11 @@ def r_p(df_loja_rec,l_prod,user_id,n,h):
 
 def calc_m(df_f,user_id):
     m_topn(df_f)
+    print('Top n finished')
     m_iknn(df_f)
+    print('Item knn finished')
     m_svd(df_f,user_id)
+    print('funk-svd finished')
 
     return
 
