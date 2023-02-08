@@ -170,8 +170,8 @@ def main():
     if 'l_prod' not in st.session_state:
         st.session_state.l_prod = []
 
-    # if 'df_lrecnp' not in st.session_state:
-    #     st.session_state.df_lrecnp=pd.DataFrame()
+    if 'df_lrecnp' not in st.session_state:
+        st.session_state.df_lrecnp=pd.DataFrame()
 
     #lista de produtos no carrinho
     #df = pd.read_csv(r"C:\Users\vitor\Documents\Python\streamlit\Scripts\output.csv", encoding = 'utf-8')
