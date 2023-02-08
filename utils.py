@@ -890,16 +890,22 @@ def calc_m(df_f,user_id):
     return
 
 def master_m(df_items):
-    filepath = './valid_metrics.parquet'
-    df = pd.read_parquet(filepath)
+    filepath = './metrics'
+
+    for p in Path(filepath).glob('**/*.parquet'):
+        df_metrics=pd.DataFrame()
+        dff = pd.read_parquet(p)
+        df_metrics=pd.concat(dff)
+    
+    #df = pd.read_parquet(filepath)
 
     RANKS = list(range(1, 21))
 
     item_ids = df_items.produto_f.unique().tolist()
-    coverage_report = get_coverage_report(df, RANKS, item_ids)
-    ranking_report = get_ranking_report(df, RANKS)
-    classification_report = get_classification_report(df, RANKS)
-    rating_report = get_rating_report(df, RANKS)
+    coverage_report = get_coverage_report(df_metrics, RANKS, item_ids)
+    ranking_report = get_ranking_report(df_metrics, RANKS)
+    classification_report = get_classification_report(df_metrics, RANKS)
+    rating_report = get_rating_report(df_metrics, RANKS)
 
     return coverage_report, ranking_report, classification_report, rating_report
 
@@ -1114,7 +1120,7 @@ def m_topn(df_f):
     df_predictions.reset_index(drop=False, inplace=True)
 
     column_order = ['model', 'user_id', 'y_true', 'y_score']
-    df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
+    df_predictions[column_order].to_parquet(f'metrics/valid_{model_name}.parquet', index=None)
 
     return
 
@@ -1175,7 +1181,7 @@ def m_iknn(df_f):
     df_predictions = df_predictions.groupby('user_id').agg({'y_true': list}).reset_index(drop=False)
     df_predictions = df_predictions.merge(df_recommendations, on='user_id', how='inner')
 
-    df_predictions.to_parquet(f'valid_{model_name}.parquet', index=None)
+    df_predictions.to_parquet(f'metrics/valid_{model_name}.parquet', index=None)
     return
 
 
@@ -1226,6 +1232,6 @@ def m_svd(df_f,user_id):
     df_predictions['model'] = model_name
     
     column_order = ['model', 'user_id', 'y_true', 'y_score']
-    df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
+    df_predictions[column_order].to_parquet(f'metrics/valid_{model_name}.parquet', index=None)
 
     return
