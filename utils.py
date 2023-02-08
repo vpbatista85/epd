@@ -128,6 +128,7 @@ def f_escolha(df):
 
     delete_page("teste_strealit_main.py", "shop")
     delete_page("teste_strealit_main.py", "cart")
+    delete_page("teste_strealit_main.py", "metrics")
 
     st.title("Bem vindo!")
 
