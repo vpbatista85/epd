@@ -890,7 +890,7 @@ def calc_m(df_f,user_id):
     return
 
 def master_m(df_items):
-    filepath = './metrics'
+    filepath = './'
 
     for p in Path(filepath).glob('**/*.parquet'):
         df_metrics=pd.DataFrame()
@@ -1120,7 +1120,7 @@ def m_topn(df_f):
     df_predictions.reset_index(drop=False, inplace=True)
 
     column_order = ['model', 'user_id', 'y_true', 'y_score']
-    df_predictions[column_order].to_parquet(f'metrics/valid_{model_name}.parquet', index=None)
+    df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
 
     return
 
@@ -1181,7 +1181,7 @@ def m_iknn(df_f):
     df_predictions = df_predictions.groupby('user_id').agg({'y_true': list}).reset_index(drop=False)
     df_predictions = df_predictions.merge(df_recommendations, on='user_id', how='inner')
 
-    df_predictions.to_parquet(f'metrics/valid_{model_name}.parquet', index=None)
+    df_predictions.to_parquet(f'valid_{model_name}.parquet', index=None)
     return
 
 
@@ -1232,6 +1232,6 @@ def m_svd(df_f,user_id):
     df_predictions['model'] = model_name
     
     column_order = ['model', 'user_id', 'y_true', 'y_score']
-    df_predictions[column_order].to_parquet(f'metrics/valid_{model_name}.parquet', index=None)
+    df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
 
     return
