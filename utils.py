@@ -169,8 +169,10 @@ def f_escolha(df):
 def main():
     if 'l_prod' not in st.session_state:
         st.session_state.l_prod = []
-    if 'df_lrecnp' not in st.session_state:
-        st.session_state.df_lrecnp=pd.DataFrame()
+
+    # if 'df_lrecnp' not in st.session_state:
+    #     st.session_state.df_lrecnp=pd.DataFrame()
+
     #lista de produtos no carrinho
     #df = pd.read_csv(r"C:\Users\vitor\Documents\Python\streamlit\Scripts\output.csv", encoding = 'utf-8')
     df_server= pd.read_csv(r"https://github.com/vpbatista85/epd/blob/main/output.csv?raw=true", encoding = 'utf-8')
@@ -180,11 +182,11 @@ def main():
     #df=df_server.copy()
     df.drop_duplicates(inplace=True)
     df.fillna("",inplace=True)
-    st.session_state.df_lrecnp=f_escolha(df)
+    #st.session_state.df_lrecnp=f_escolha(df)
     #f_carrinho()
     #r_np(df_loja_recnp,st.session_state.l_prod)
     #r_p(df_loja_recnp,st.session_state.l_prod)
-    st.session_state.df_lrecnp['dth_hora']=st.session_state.df_lrecnp['dth_agendamento'].apply(extract_hour)
+    #st.session_state.df_lrecnp['dth_hora']=st.session_state.df_lrecnp['dth_agendamento'].apply(extract_hour)
     
 
 
