@@ -884,6 +884,7 @@ def r_p(df_loja_rec,l_prod,user_id,n,h):
 ##############  METRICAS #################################
 
 def calc_m(df_f,user_id):
+    print('entered on calc_m')
     m_topn(df_f)
     print('Top n finished')
     m_iknn(df_f)
