@@ -13,6 +13,13 @@ import seaborn as sns
 import lightfm
 from datetime import datetime,  timedelta, date
 from cycler import cycler
+
+from contextlib import redirect_stdout, redirect_stderr
+import io
+import sys
+import subprocess
+import traceback
+
 matplotlib.rcParams['axes.prop_cycle'] = cycler(color=['#007efd', '#FFC000', '#303030'])
 
 from funk_svd import SVD
@@ -885,13 +892,20 @@ def r_p(df_loja_rec,l_prod,user_id,n,h):
 
 def calc_m(df_f,user_id):
     print('entered on calc_m')
+    with redirect_stdout(io.StringIO()) as stdout_f:
+        stdout_f.write('entered on calc_m')
     m_topn(df_f)
     print('Top n finished')
+    with redirect_stdout(io.StringIO()) as stdout_f:
+        stdout_f.write('Top n finished')    
     m_iknn(df_f)
     print('Item knn finished')
+    with redirect_stdout(io.StringIO()) as stdout_f:
+        stdout_f.write('Item knn finished')    
     m_svd(df_f,user_id)
     print('funk-svd finished')
-
+    with redirect_stdout(io.StringIO()) as stdout_f:
+        stdout_f.write('funk-svd finished')    
     return
 
 def master_m(df_items):
