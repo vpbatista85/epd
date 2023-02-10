@@ -905,11 +905,16 @@ def calc_m(df_f):
     m_svd(df_f)
     print('funk-svd finished')
     with redirect_stdout(io.StringIO()) as stdout_f:
-        stdout_f.write('funk-svd finished')    
+        stdout_f.write('funk-svd finished')  
+    m_lfm(df_f)
+    print('lightFM finished')
+    with redirect_stdout(io.StringIO()) as stdout_f:
+        stdout_f.write('lightFM finished')  
+
     return
 
-def master_m(df_items):
-    filepath = '*.parquet'
+def master_m(df_items,filepath):
+    
     search_word = 'valid'
     final_files = []
     for file in glob.glob(filepath, recursive=True):
@@ -1178,10 +1183,12 @@ def m_iknn(df_f):
 
 
     df_recommendations = pd.DataFrame()
-    catalog = df_k.produto_full.values
+    #catalog = df_k.produto_full.values
+    catalog = df_k.produto_f.values #### following important change below#####
     for user_id in df_valid_set['userID'].unique():
         user_known_items = df_train_set.query('userID == @user_id')['itemID'].unique()
         recommendable_items = np.array(list(set(catalog)-set(user_known_items)))
+        df_f=df_k[df_k.produto_f.isin(recommendable_items)]#### important change #####
         user_recommendations = rp_iknn(df_f,df_f,l_prod=None, user_id=user_id,n=n).reset_index(drop=False)
         user_recommendations['user_id'] = user_id
         df_recommendations = pd.concat([df_recommendations, user_recommendations])
@@ -1205,7 +1212,9 @@ def m_iknn(df_f):
     df_predictions = df_predictions.groupby('user_id').agg({'y_true': list}).reset_index(drop=False)
     df_predictions = df_predictions.merge(df_recommendations, on='user_id', how='inner')
 
-    df_predictions.to_parquet(f'valid_{model_name}.parquet', index=None)
+    
+    column_order = ['model', 'user_id', 'y_true', 'y_score']
+    df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
     return
 
 
@@ -1241,7 +1250,7 @@ def m_svd(df_f):
     for user_id in df_valid_set['u_id'].unique():
         user_known_items = df_train_set.query('u_id == @user_id')['i_id'].unique()
         recommendable_items = np.array(list(set(catalog)-set(user_known_items)))
-        
+        df_f=df_svd[df_svd.produto_full.isin(recommendable_items)]#### important change #####
         user_recommendations = rp_fsvd(df_f,df_f,l_prod=recommendable_items,user_id=user_id,n=n).reset_index(drop=False)
         user_recommendations['user_id'] = user_id
         df_recommendations = pd.concat([df_recommendations, user_recommendations])
@@ -1255,6 +1264,53 @@ def m_svd(df_f):
     df_predictions = df_predictions.merge(df_recommendations, on='user_id', how='inner')
     df_predictions['model'] = model_name
     
+    column_order = ['model', 'user_id', 'y_true', 'y_score']
+    df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
+
+    return
+
+def m_lfm(df_f):
+    model_name = 'svd'
+    n = 20
+
+    dfl=df_f.reset_index()
+    df_l=dfl[['cod_pedido','produto_f']].groupby('cod_pedido').agg({'produto_f': lambda x : ','.join(set(x))})
+    df_l.rename(columns={'produto_f':'itens'},inplace=True)
+    df_l.reset_index(inplace=True)
+    df_l['itens']=df_l.itens.str.split(pat=',')
+    df_l.head()
+
+    #preparando os dados:
+    df_lf=df_f.reset_index()
+    df_lfdm=pd.get_dummies(df_lf[['categoria','tipo_categoria','produto','prodcomplemento']])#features
+    df_lf['produto_full']=df_lf['categoria']+" "+df_lf['tipo_categoria']+" "+df_lf['produto']+" "+df_lf['prodcomplemento']
+    df_lf['produto_f']=df_lf['produto']+" "+df_lf['prodcomplemento']
+    df_lf['timestamp']=pd.to_datetime(df_lf.dth_agendamento).map(pd.Timestamp.timestamp)
+    df_lfc=df_lf[['cliente_nome']].merge(df_lf[['produto_f']],left_index=True,right_index=True)
+    df_lf=df_lfc.merge(df_lfdm,left_index=True, right_index=True)
+    df_lf=df_lf.groupby(['cliente_nome','produto_f']).sum()
+    df_lf.reset_index(inplace=True)
+
+    train_size = 0.8
+    # Definindo train e valid sets
+    df_train_set, df_valid_set= np.split(df_lf, [ int(train_size*df_lf.shape[0]) ])
+
+    catalog = df_lf.produto_full.values
+    df_recommendations = pd.DataFrame()
+    for user_id in df_valid_set['cliente_nome'].unique():
+        user_known_items = df_train_set.query('cliente_nome == @user_id')['produto_full'].unique()
+        recommendable_items = np.array(list(set(catalog)-set(user_known_items)))
+        df_f=df_lf[df_lf.produto_full.isin(recommendable_items)]#### important change #####
+        user_recommendations = rp_lfm(df_f,df_f,l_prod=recommendable_items,user_id=user_id,n=n).reset_index(drop=False)
+        user_recommendations['user_id'] = user_id
+        df_recommendations = pd.concat([df_recommendations, user_recommendations])
+
+    df_predictions = df_valid_set.rename({'cliente_nome': 'user_id', 'produto_full': 'item_id'}, axis=1)
+    df_predictions['y_true'] = df_predictions.apply(lambda x: {'item_id': x['item_id'], 'rating': x['rating']}, axis=1)
+    df_predictions = df_predictions.groupby('user_id').agg({'y_true': list}).reset_index(drop=False)
+    df_predictions = df_predictions.merge(df_recommendations, on='user_id', how='inner')
+    df_predictions['model'] = model_name
+
     column_order = ['model', 'user_id', 'y_true', 'y_score']
     df_predictions[column_order].to_parquet(f'valid_{model_name}.parquet', index=None)
 
